@@ -50,6 +50,9 @@ install: all
 	mkdir -p /usr/share/xsessions
 	cp -f nihwm.desktop /usr/share/xsessions
 	chmod 644 /usr/share/xsessions/nihwm.desktop
+	
+	mkdir -p ${CONFIG}/rofi
+	cp -f nihwm.rasi ${CONFIG}/rofi	
 
 uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/nihwm\
