@@ -1,0 +1,100 @@
+#!/usr/bin/sh
+
+#define VERSION 0.1
+
+# The X Set Root
+# Display Style here
+
+# Is this shit bloated? I hope not
+
+# Should I use C? The lazy thing is that I am not sure if
+# combing C with programs/forking is a good idea
+
+battery_notified=false
+
+iscommand() {
+	if ! [ -x $(command -v $1) ]; then
+		echo "$1 is not installed."
+		exit 1
+	fi
+}
+
+graceful_close() {
+
+rofi -show window -theme nihwm &
+
+OIFS="$IFS"
+IFS=$'\n'
+for p in $(wmctrl -l); do
+	program=$(echo $p | awk 'BEGIN {ORS = " ";} {for ( i = 4; i <= NF; i++ ) print $i;}' | sed 's/ $//g' )
+	echo "Asking to die peacefully to program \"$program\""
+	wmctrl -c $program
+done
+
+IFS="$OIFS"
+
+while [ $(wmctrl -l | wc -l) -gt 1 ] ; do
+	echo Waiting...
+	sleep 0.5
+done
+
+}
+
+if [ "$1" = "shutdown" ]; then # SHUTDOWN
+
+graceful_close
+
+shutdown -P 0
+
+exit 1
+
+elif [ "$1" = "reboot" ]; then # REBOOT
+
+graceful_close
+
+shutdown r -P 0
+
+elif [ "$1" = "statusbar" ]; then # STATUSBAR
+
+while true
+do
+	# Only use Right because of Mono
+	volume=$(amixer get Master | grep 'Right:.*\(.*\)' | cut -d" " -f7)
+
+	# Battery
+	battery=$(upower -i $(upower -e | grep 'BAT') | grep 'percentage' | cut -d " " -f15)
+
+	# Is Capslock
+	caps=$(xset q | grep 'Caps Lock' | awk '{print $4}')
+
+	if [ "$caps" = "on" ]; then
+		caps='C'
+	else
+		caps=''
+	fi
+
+	# Is NumLock
+	
+	nums=$(xset q | grep 'Nums Lock' | awk '{print $8}')
+
+	if [ "$nums" = "on" ]; then
+		nums='N'
+	else
+		nums=''
+	fi
+
+	# Battery checker
+	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
+		notify-send --urgency=critical -t 0 --icon=battery "Battery is low" "<span font='50px'>Please charge your Laptop's battery or use the cable while your laptop is still on.</span>"
+		battery_notified=true
+	fi
+
+	# 
+	! xsetroot -name "[${caps}${nums}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
+
+	sleep 0.1
+done
+
+exit 0
+
+fi

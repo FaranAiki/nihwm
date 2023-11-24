@@ -1,0 +1,58 @@
+# nihwm - nihilist window manager
+# See LICENSE file for copyright and license details.
+
+include config.mk
+
+CC = gcc 
+SRC = drw.c nihwm.c util.c
+OBJ = ${SRC:.c=.o}
+
+all: options nihwm
+
+options:
+	@echo nihwm build options:
+	@echo "CFLAGS   = ${CFLAGS}"
+	@echo "LDFLAGS  = ${LDFLAGS}"
+	@echo "CC       = ${CC}"
+
+.c.o:
+	${CC} -c ${CFLAGS} $<
+
+${OBJ}: config.h config.mk
+
+config.h:
+	cp config.def.h $@
+
+nihwm: ${OBJ}
+	${CC} -o $@ ${OBJ} ${LDFLAGS}
+
+clean:
+	rm -f nihwm ${OBJ} nihwm-${VERSION}.tar.gz
+
+dist: clean
+	mkdir -p nihwm-${VERSION}
+	cp -R LICENSE Makefile README config.def.h config.mk\
+		nihwm.1 drw.h util.h ${SRC} nihwm.png transient.c nihwm-${VERSION}
+	tar -cf nihwm-${VERSION}.tar nihwm-${VERSION}
+	gzip nihwm-${VERSION}.tar
+	rm -rf nihwm-${VERSION}
+
+install: all
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	cp -f nihwm ${DESTDIR}${PREFIX}/bin
+	cp -f nihwmctl ${DESTDIR}${PREFIX}/bin
+	chmod 755 ${DESTDIR}${PREFIX}/bin/nihwm
+	chmod 755 ${DESTDIR}${PREFIX}/bin/nihwmctl
+	mkdir -p ${DESTDIR}${MANPREFIX}/man1
+	sed "s/VERSION/${VERSION}/g" < nihwm.1 > ${DESTDIR}${MANPREFIX}/man1/nihwm.1
+	chmod 644 ${DESTDIR}${MANPREFIX}/man1/nihwm.1
+	
+	mkdir -p /usr/share/xsessions
+	cp -f nihwm.desktop /usr/share/xsessions
+	chmod 644 /usr/share/xsessions/nihwm.desktop
+
+uninstall:
+	rm -f ${DESTDIR}${PREFIX}/bin/nihwm\
+		${DESTDIR}${MANPREFIX}/man1/nihwm.1
+
+.PHONY: all options clean dist install uninstall

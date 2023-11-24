@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=nihwm
+Comment=nihwm is a good window manager for those who think ricing wm is useless. Styles, managers, wallpapers, they do not really matter do they. Because... why do you even use the computer?
+Exec=nihwm
+Icon=nihwm
+Type=XSession

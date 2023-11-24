@@ -1,0 +1,14 @@
+amixer
+chromium
+dmenu_run
+gromit-mpx
+flameshot
+notify-send
+thunar
+rhythmbox
+obs
+kitty
+krita
+lmms1.3.0
+zathura
+inkscape
