@@ -1702,7 +1702,7 @@ setup(void)
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8,
-		PropModeReplace, (unsigned char *) "nihwm", 3);
+		PropModeReplace, (unsigned char *) "nihwm", 5);
 	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 
@@ -2354,7 +2354,7 @@ main(int argc, char *argv[])
 	if (argc == 1 || strcmp("-no-startapp", argv[1]) != 0) startapp(); // auto start application
 	scan();
 	run();
-	if (restart) execvp(argv[0], nihwm_reslist); // TODO IMPLEMENT THIS
+	if (restart) execvp(argv[0], nihwm_reslist); 
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
