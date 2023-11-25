@@ -129,6 +129,7 @@ static const Rule rules[] = {
 	{  "krita",         "krita",      NULL,          1 << 7,       0,           -1},
 	{  "Inkscape",      "org.inkscape.Inkscape",     NULL,          1 << 7,       0,           -1},
 	{  "lmms.real",     "lmms.real",     NULL,       1 << 8,       0,           -1},
+	{  "Mousepad",      "mousepad",   NULL,          0,            1,           -1 }
 };
 
 static Key keys[] = {

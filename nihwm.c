@@ -548,7 +548,12 @@ clientmessage(XEvent *e)
 			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
 				|| (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ && !c->isfullscreen)));
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
-		if (!switchonfocus) return;
+		if (!switchonfocus) {
+			if (c != selmon->sel && !c->isurgent)
+				seturgent(c, 1);
+			return;
+		}
+
 		for (i = 0; i < LENGTH(tags) && !((1 << i) & c->tags); i++);
 		if (i < LENGTH(tags)) {
 			const Arg a = {.ui = 1 << i};
@@ -561,13 +566,15 @@ clientmessage(XEvent *e)
 		c->tags = cme->data.l[0];
 		arrange(c->mon);
 	} else if (cme->message_type == netatom[NetCloseWindow]) {
-		arg.v = (void *) c;
+		arg.v = c;
 		if (c) killclient(&arg, 0);
 		// TODO patch this
 	} else if (cme->message_type == netatom[NetCurrentDesktop]) {
 		c->tags = cme->data.l[0];
 
-		// not supported fully
+		printf("HIT %d\n", c->tags);
+
+		// not fully supported
 
 		updateclientdesktop(c);
 		focus(NULL);
@@ -1106,6 +1113,10 @@ killclient(const Arg *arg, const int forced)
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
 	} else if (forced) {
+		// TODO implement correctly using kill
+		pid_atom = getatomprop(c, NetWMPID);
+		// name = get
+
 		XSync(dpy, False);
 		XKillClient(dpy, c->win);
 		XSync(dpy, False);
@@ -1472,7 +1483,7 @@ restack(Monitor *m)
 }
 
 void
-run(void)
+run (void)
 {
 	XEvent ev;
 	/* main event loop */
