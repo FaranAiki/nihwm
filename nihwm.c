@@ -966,6 +966,7 @@ getstate(Window w)
 	return result;
 }
 
+// similar to getatomprop
 int
 gettextprop(Window w, Atom atom, char *text, unsigned int size)
 {
@@ -1095,10 +1096,8 @@ killclientsel(const Arg *arg)
 void
 killclient(const Arg *arg, const int forced)
 {
+	XTextProperty text_data;
 	int pid;
-	char *name;
-	Atom pid_atom;
-
 	Client *c = (Client *) arg->v;
 	
 	if (!c) return;	
@@ -1114,8 +1113,6 @@ killclient(const Arg *arg, const int forced)
 		XUngrabServer(dpy);
 	} else if (forced) {
 		// TODO implement correctly using kill
-		pid_atom = getatomprop(c, NetWMPID);
-		// name = get
 
 		XSync(dpy, False);
 		XKillClient(dpy, c->win);
@@ -1692,7 +1689,7 @@ setup(void)
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 	netatom[NetCloseWindow] = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
 	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
-	netatom[NetWMPID] = XInternAtom(dpy, "_NET_WM_PID", True);
+	netatom[NetWMPID] = XInternAtom(dpy, "_NET_WM_PID", False);
 
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);

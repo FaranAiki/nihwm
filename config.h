@@ -92,7 +92,7 @@ static const char *lmms130cmd[] = { "lmms1.3.0", NULL };
 
 /* not in nihwm, my own config KEYBOARDS */
 static const char *xkbqwerty[] = { "setxkbmap", "us", NULL };
-static const char *xkbdvorak[] = { "setxkbmap", "dvorak", NULL };
+static const char *xkbdvorak[] = { "setxkbmap", "us", "-variant", "dvorak", NULL };
 static const char *xkbcolemak[] = { "setxkbmap", "us", "-variant", "colemak", NULL };
 static const char *xkbarabic[] = { "setxkbmap", "ara", NULL };
 
