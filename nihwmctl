@@ -21,7 +21,7 @@ iscommand() {
 
 graceful_close() {
 
-rofi -show window -theme nihwm &
+rofi -show window -theme nihwm-theme &
 
 OIFS="$IFS"
 IFS=$'\n'
