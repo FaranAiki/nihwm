@@ -6,7 +6,7 @@ VERSION = 0.1
 # paths
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
-CONFIG = ~/.config
+CONFIG = /home/${SUDO_USER}/.config
 
 X11INC = /usr/X11R6/include
 X11LIB = /usr/X11R6/lib

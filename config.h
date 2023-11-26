@@ -29,7 +29,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging; why japs? cuz kanji is easier */
-static const char *tags[] = { "電", "捜", "歌", "開", "操", "?", "?", "描", "曲" };
+static const char *tags[] = { "電", "捜", "歌", "開", "操", "愛", "気", "描", "曲" };
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
@@ -63,14 +63,14 @@ static const Layout layouts[] = {
 #define PRNSC 0x0000ff61
 
 /* helper for spawning shell commands (not recommended )*/
-#define SHCMD(cmd) { .v = (const char*[]){ "/bin/bash", "-c", cmd, NULL } }
+#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 static const char *shutdowncmd[] = { "nihwmctl", "shutdown" }; 
 static const char *rebootcmd[] = { "nihwmctl", "reboot" }; // TODO implement this 
-static const char *roficmd[] = { "rofi", "-show", "drun", "-show-icons", "-theme", "nihwm", NULL };
+static const char *roficmd[] = { "rofi", "-show", "drun", "-theme", "nihwm-theme", NULL };
 
 static const char *termcmd[]  = { USEDTERMINAL, NULL };
 static const char *printscr[] = { "flameshot", "gui", NULL };

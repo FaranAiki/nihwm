@@ -52,7 +52,7 @@ install: all
 	chmod 644 /usr/share/xsessions/nihwm.desktop
 	
 	mkdir -p ${CONFIG}/rofi
-	cp -f nihwm.rasi ${CONFIG}/rofi	
+	cp -f nihwm-theme.rasi ${CONFIG}/rofi	
 
 uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/nihwm\
