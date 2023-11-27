@@ -5,7 +5,7 @@
 #define LAYOUTS 
 
 // Include Layouts
-#include "fibonacci.c"
+#include "layout.c"
 
 #define TRAIN_KEYBOARD_LAYOUT
 
@@ -29,7 +29,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging; why japs? cuz kanji is easier */
-static const char *tags[] = { "電", "捜", "歌", "開", "操", "愛", "気", "描", "曲" };
+static const char *tags[] = { "曲", "捜", "歌", "開", "操", "愛", "録", "描", "電" };
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
@@ -117,19 +117,22 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class            instance      title          tags mask     isfloating   monitor */
+	{  "lmms.real",     "lmms.real",     NULL,       1 << 0,       0,           -1}, // ergonomic reason
+	{  "Audacity",      "audacity",   NULL,          1 << 0,       1,           -1},
 	{  "Chromium",      "chromium",   NULL,          1 << 1,       0,           -1},
 	{  "firefox",       "Navigator",  NULL,          1 << 1,       0,           -1},
 	{  "Opera",         "Opera",      NULL,          1 << 1,       0,           -1},
 	{  "Rhythmbox",     "rhythmbox",  NULL,          1 << 2,       0,           -1},
 	{  "Thunar",        "thunar",     NULL,          1 << 3,       0,           -1},
 	{  "Zathura",       "org.pwmt.zathura",          NULL,          1 << 4,       0,           -1},
-	{  "Gromit-mpx",     "gromit-mpx",  NULL,        1 << 4,       0,           -1},
-	{  "Pavucontrol",    "pavucontrol",  NULL,       1 << 4,       0,           -1},
+	{  "Gromit-mpx",    "gromit-mpx",  NULL,         1 << 4,       0,           -1},
+	{  "Pavucontrol",   "pavucontrol",  NULL,        1 << 4,       0,           -1},
 	{  "obs",           "obs",        NULL,          1 << 6,       0,           -1},
+	{  "Olive",         "olive-editor",  NULL,       1 << 6,       0,           -1},
 	{  "krita",         "krita",      NULL,          1 << 7,       0,           -1},
 	{  "Inkscape",      "org.inkscape.Inkscape",     NULL,          1 << 7,       0,           -1},
-	{  "lmms.real",     "lmms.real",     NULL,       1 << 8,       0,           -1},
-	{  "Mousepad",      "mousepad",   NULL,          0,            1,           -1 }
+	{  "Mousepad",      "mousepad",   NULL,          0,            1,           -1 },
+	{  "kitty",         "kitty",   NULL,          0,            1,           -1 }
 };
 
 static Key keys[] = {
