@@ -2303,22 +2303,34 @@ main(int argc, char *argv[])
 		die("nihwm-"VERSION);
 	else if (argc == 2 && !strcmp("-h", argv[1]))
 		die("usage: nihwm [-v] or nihwm [-no-startapp]");
+
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
+	
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("nihwm: cannot open display");
+	
 	checkotherwm();
 	setup();
+
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec", NULL) == -1)
 		die("pledge");
 #endif /* __OpenBSD__ */
 	// using || as a lazy checker
+
 	if (argc == 1 || strcmp("-no-startapp", argv[1]) != 0) startapp(); // auto start application
+
 	scan();
+
+	view(&startup_tag);	
+
 	run();
+	
 	if (restart) execvp(argv[0], nihwm_reslist); 
+
 	cleanup();
 	XCloseDisplay(dpy);
+	
 	return EXIT_SUCCESS;
 }

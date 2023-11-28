@@ -12,7 +12,7 @@
 /* appearance */
 static const unsigned int snap      = 32;       /* snap pixel */
 static unsigned int borderpx        = 8;        /* border pixel of windows */ // not constant
-static int showbar                  = 0;        /* 0 means no bar */
+static int showbar                  = 1;        /* 0 means no bar */
 static int topbar                   = 1;        /* 0 means bottom bar */
 static const char *fonts[]          = { "monospace:size=10" };
 static const char dmenufont[]       = "monospace:size=10";
@@ -25,7 +25,7 @@ static const char col_cyan[]        = "#005577";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { col_gray3, col_black, col_black },
-	[SchemeSel]  = { col_gray4, "#050505",  "#101010" },
+	[SchemeSel]  = { col_gray4, "#050505",  col_gray1 },
 };
 
 /* tagging; why japs? cuz kanji is easier */
@@ -36,6 +36,9 @@ static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] 
 static const int nmaster     = 1;    /* number of clients in master area */
 static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
 static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
+
+/* other(s) */
+static const Arg startup_tag = { .ui = 1 << 8 };
 
 // TODO separate layouts to a single file
 static const Layout layouts[] = {
@@ -131,8 +134,10 @@ static const Rule rules[] = {
 	{  "Olive",         "olive-editor",  NULL,       1 << 6,       0,           -1},
 	{  "krita",         "krita",      NULL,          1 << 7,       0,           -1},
 	{  "Inkscape",      "org.inkscape.Inkscape",     NULL,          1 << 7,       0,           -1},
+	{  "kitty",         "kitty",   NULL,             1 << 8,        0,           -1 },
+	{  "Alacritty",     "Alacritty",   NULL,         1 << 8,        0,           -1 },
+	{  "XTerm",         "xterm",   NULL,         1 << 8,        0,           -1 },
 	{  "Mousepad",      "mousepad",   NULL,          0,            1,           -1 },
-	{  "kitty",         "kitty",   NULL,          0,            1,           -1 }
 };
 
 static Key keys[] = {
