@@ -114,14 +114,16 @@ static const StartApplication startup[] = {
 	{ 1 << 8,	{.v = lmms130cmd} },
 };
 
+/* this is where the rules are defined */
 static const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class            instance      title          tags mask     isfloating   monitor */
-	{  "lmms.real",     "lmms.real",     NULL,       1 << 0,       0,           -1}, // ergonomic reason
-	{  "Audacity",      "audacity",   NULL,          1 << 0,       1,           -1},
+	{  "lmms.real",     "lmms.real" ,    NULL,       1 << 0,       0,           -1}, // ergonomic reason
+	{  "Audacity",      "audacity",   NULL,          1 << 0,       0,           -1},
+	{  "OpenUtau",      "OpenUtau",   NULL,          1 << 0,       0,           -1},
 	{  "Chromium",      "chromium",   NULL,          1 << 1,       0,           -1},
 	{  "firefox",       "Navigator",  NULL,          1 << 1,       0,           -1},
 	{  "Opera",         "Opera",      NULL,          1 << 1,       0,           -1},
@@ -140,6 +142,7 @@ static const Rule rules[] = {
 	{  "Mousepad",      "mousepad",   NULL,          0,            1,           -1 },
 };
 
+/* this is where the keys are defined */
 static Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_F10,    spawn,          {.v = decvolcmd} },
@@ -215,6 +218,8 @@ static Button buttons[] = {
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
+	{ ClkClientWin,         MODKEY|ShiftMask, Button1,      focusstack,     {.i = +1 } },
+	{ ClkClientWin,         MODKEY|ShiftMask, Button3,      focusstack,     {.i = -1 } },
 	{ ClkTagBar,            0,              Button1,        view,           {0} },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
