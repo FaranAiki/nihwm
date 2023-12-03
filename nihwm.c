@@ -212,6 +212,7 @@ static void startapp(void);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
 static void togglebar(const Arg *arg);
+static void togglecolorsel(const Arg *arg);
 static void toggletopbar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void toggletag(const Arg *arg);
@@ -1818,6 +1819,20 @@ void
 toggleswitchonfocus(const Arg *arg)
 {
 	switchonfocus = !switchonfocus;
+}
+
+void
+togglecolorsel(const Arg *arg)
+{
+	int i; // we gonna use for (i = ..) instead of for (int i = ..)
+	
+	col_sel = (col_sel + 1) % 5;
+	colors[SchemeSel][2] = used_color[col_sel]; // switch through color selection border
+
+	/* init appearance */
+	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
+	for (i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], 3);
 }
 
 void

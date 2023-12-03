@@ -8,7 +8,7 @@
 # Is this shit bloated? I hope not
 
 # Should I use C? The lazy thing is that I am not sure if
-# combing C with programs/forking is a good idea
+# combining C with programs/forking is a good idea
 
 battery_notified=false
 

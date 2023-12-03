@@ -8,7 +8,8 @@ configuration {
 
 * {
     foreground: #f8f8f2;
-    background-color: #282a36;
+    foreground-diminished: #bebebe;
+	background-color: #282a36;
     active-background: #6272a4;
     urgent-background: #ff5555;
     urgent-foreground: #282a36;
@@ -110,8 +111,9 @@ configuration {
     text-color: @foreground;
 }
 #entry {
+	placeholder: "Type to find .desktop file(s)";
     spacing:    0;
-    text-color: @foreground;
+    text-color: @foreground-diminished;
 }
 #prompt {
     spacing:    0;
@@ -122,8 +124,8 @@ configuration {
 }
 #textbox-prompt-colon {
     expand:     false;
-    str:        ">";
-    margin:     0px 0.3em 0em 0em ;
+    str:        ">>";
+    margin:     0px 0.314em 0em 0em ;
     text-color: @foreground;
 }
 element-text, element-icon {
