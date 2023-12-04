@@ -284,14 +284,15 @@ static Window root, wmcheckwin;
 static const char * const snetfocus[2] = { "NOT SWITCH WHEN FOCUS", "SWITCH WHEN FOCUS" };
 
 /* constants */
-static char *nihwm_reslist[]  = {"nihwm", "-no-startapp", NULL};
-static char *nihwmctl_kill[]  = {"/bin/killall", "nihwmctl", NULL};
-static char *nihwmctl_start_[] = {"nihwmctl", "statusbar", NULL};
+static const char *nihwm_reslist[]  = {"nihwm", "-no-startapp", NULL};
+static const char *nihwmctl_kill_[]  = {"killall", "nihwmctl", NULL};
+static const char *nihwmctl_start_[] = {"nihwmctl", "statusbar", NULL};
 
 // TODO optimize this
 
 /* arg */
 static const Arg nihwmctl_start = { .v = nihwmctl_start_ };
+static const Arg nihwmctl_kill = { .v = nihwmctl_kill_ };
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
@@ -2370,7 +2371,7 @@ main(int argc, char *argv[])
 
 	run();
 	
-	execvp(nihwmctl_kill[0], nihwmctl_kill);
+	spawn(&nihwmctl_kill);
 	if (restart) execvp(argv[0], nihwm_reslist); 
 
 	cleanup();
