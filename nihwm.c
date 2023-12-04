@@ -284,7 +284,14 @@ static Window root, wmcheckwin;
 static const char * const snetfocus[2] = { "NOT SWITCH WHEN FOCUS", "SWITCH WHEN FOCUS" };
 
 /* constants */
-static char *nihwm_reslist[] = {"nihwm", "-no-startapp", NULL};
+static char *nihwm_reslist[]  = {"nihwm", "-no-startapp", NULL};
+static char *nihwmctl_kill[]  = {"/bin/killall", "nihwmctl", NULL};
+static char *nihwmctl_start_[] = {"nihwmctl", "statusbar", NULL};
+
+// TODO optimize this
+
+/* arg */
+static const Arg nihwmctl_start = { .v = nihwmctl_start_ };
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
@@ -1803,9 +1810,11 @@ spawn(const Arg *arg)
 void
 startapp(void)
 {
-	unsigned int i;
+	int i;
+	Arg arg;
 	for (i = 0; i < LENGTH(startup); i++) {
-		spawn(&startup[i].cmd);
+		arg.v = startup[i];
+		spawn(&arg);
 	}
 }
 
@@ -2351,7 +2360,8 @@ main(int argc, char *argv[])
 		die("pledge");
 #endif /* __OpenBSD__ */
 	// using || as a lazy checker
-
+	//
+	spawn(&nihwmctl_start);
 	if (argc == 1 || strcmp("-no-startapp", argv[1]) != 0) startapp(); // auto start application
 
 	scan();
@@ -2360,6 +2370,7 @@ main(int argc, char *argv[])
 
 	run();
 	
+	execvp(nihwmctl_kill[0], nihwmctl_kill);
 	if (restart) execvp(argv[0], nihwm_reslist); 
 
 	cleanup();

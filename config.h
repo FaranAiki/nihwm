@@ -58,7 +58,7 @@ static const Layout layouts[] = {
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
  	{ "[@]",      spiral },
- 	{ "[\\]",     dwindle },
+ 	{ "[\\]",    dwindle },
 };
 
 /* Misc */
@@ -93,8 +93,6 @@ static const char *printscr[] = { "flameshot", "gui", NULL };
 static const char *decvolcmd[] = { "amixer", "-D", "pulse", "sset", "Master", "1%-", NULL };
 static const char *incvolcmd[] = { "amixer", "-D", "pulse", "sset", "Master", "1%+", NULL };
 
-/* Define the startup command (required) */
-static const char *statusbarcmd[] = { "nihwmctl", "statusbar",  NULL };
 static const char *gromitmpxcmd[] = { "gromit-mpx", NULL };
 static const char *pavucontrolcmd[] = { "pavucontrol", NULL };
 
@@ -112,18 +110,16 @@ static const char *xkbarabic[] = { "setxkbmap", "ara", NULL };
 static const char *xkbjapanese[] = { "setxkbmap", "ara", NULL };
 
 /* startup */
-static const StartApplication startup[] = {
-	/* tag       command  */
-	{ 1 << 0,	{.v = statusbarcmd} },
-	{ 1 << 4,	{.v = pavucontrolcmd} },
-	{ 1 << 4,	{.v = gromitmpxcmd} },
+static const char **startup[] = {
+	/* command  */
+	pavucontrolcmd,
+	gromitmpxcmd,
 
-	/* optional */
-	{ 1 << 0,	{.v = termcmd} },
-	{ 1 << 1,	{.v = browsercmd} },
-	{ 1 << 2,	{.v = rhythmboxcmd} },
-	{ 1 << 3,	{.v = thunarcmd} },
-	{ 1 << 8,	{.v = lmms130cmd} },
+	termcmd,
+	browsercmd,
+	rhythmboxcmd,
+	thunarcmd,
+	lmms130cmd
 };
 
 /* this is where the rules are defined */
