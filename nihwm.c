@@ -55,6 +55,7 @@ enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
+enum { CusNetFocusChange, CusLast }; /* custom atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
@@ -269,7 +270,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[PropertyNotify] = propertynotify,
 	[UnmapNotify] = unmapnotify
 };
-static Atom wmatom[WMLast], netatom[NetLast];
+static Atom wmatom[WMLast], netatom[NetLast], cusatom[CusLast];
 static int restart = 0;
 static int running = 1;
 static Cur *cursor[CurLast];
@@ -278,6 +279,9 @@ static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
+
+/* custom net  */
+static const char * const snetfocus[2] = { "NOT SWITCH WHEN FOCUS", "SWITCH WHEN FOCUS" };
 
 /* constants */
 static char *nihwm_reslist[] = {"nihwm", "-no-startapp", NULL};
@@ -1670,10 +1674,15 @@ setup(void)
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	netatom[NetWMWindowTypeDialog] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 	netatom[NetCloseWindow] = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
 	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
 	netatom[NetWMPID] = XInternAtom(dpy, "_NET_WM_PID", False);
+
+
+	/* init customizable atoms */
+	cusatom[CusNetFocusChange] = XInternAtom(dpy, "_NET_FOCUS_CHANGE", False);
 
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
@@ -1697,6 +1706,10 @@ setup(void)
 		PropModeReplace, (unsigned char *) "nihwm", 5);
 	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
+
+	/* custom atom initialization */
+	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], utf8string, 8,
+		PropModeReplace, (unsigned char *) snetfocus[switchonfocus], switchonfocus ? 17 : 21 );
 
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
@@ -1818,7 +1831,12 @@ tagmon(const Arg *arg)
 void
 toggleswitchonfocus(const Arg *arg)
 {
+	Atom utf8string = XInternAtom(dpy, "UTF8_STRING", False);
+
 	switchonfocus = !switchonfocus;
+
+	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], utf8string, 8,
+		PropModeReplace, (unsigned char *) snetfocus[switchonfocus], switchonfocus ? 17 : 21 );
 }
 
 void

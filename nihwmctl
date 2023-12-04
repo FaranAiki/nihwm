@@ -6,9 +6,12 @@
 # Display Style here
 
 # Is this shit bloated? I hope not
+# This is very slow UwU
 
 # Should I use C? The lazy thing is that I am not sure if
 # combining C with programs/forking is a good idea
+
+
 
 battery_notified=false
 
@@ -58,6 +61,7 @@ elif [ "$1" = "statusbar" ]; then # STATUSBAR
 
 while true
 do
+
 	# Only use Right because of Mono
 	volume=$(amixer get Master | grep 'Right:.*\(.*\)' | cut -d" " -f7)
 
@@ -74,13 +78,21 @@ do
 	fi
 
 	# Is NumLock
-	
 	nums=$(xset q | grep 'Nums Lock' | awk '{print $8}')
 
 	if [ "$nums" = "on" ]; then
 		nums='N'
 	else
 		nums=''
+	fi
+
+	# Is Focus On Switch
+	focusmode=$(xprop -root _NET_FOCUS_CHANGE | cut -d"=" -f2)
+
+	if [ "$focusmode" = ' "SWITCH WHEN FOCUS"' ]; then
+		focusmode='F'
+	else
+		focusmode=''
 	fi
 
 	# Battery checker
@@ -90,7 +102,7 @@ do
 	fi
 
 	# 
-	! xsetroot -name "[${caps}${nums}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
+	! xsetroot -name "[${caps}${nums}${focusmode}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
 
 	sleep 0.1
 done

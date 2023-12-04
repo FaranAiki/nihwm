@@ -1,5 +1,5 @@
 # nihwm version
-VERSION = 0.1
+VERSION = 0.11
 
 # Customize below to fit your system
 
