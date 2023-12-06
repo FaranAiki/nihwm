@@ -70,7 +70,6 @@ do
 
 	# Is Capslock
 	caps=$(xset q | grep 'Caps Lock' | awk '{print $4}')
-
 	if [ "$caps" = "on" ]; then
 		caps='C'
 	else
@@ -79,7 +78,6 @@ do
 
 	# Is NumLock
 	nums=$(xset q | grep 'Nums Lock' | awk '{print $8}')
-
 	if [ "$nums" = "on" ]; then
 		nums='N'
 	else
@@ -87,13 +85,21 @@ do
 	fi
 
 	# Is Focus On Switch
-	focusmode=$(xprop -root _NET_FOCUS_CHANGE | cut -d"=" -f2)
-
-	if [ "$focusmode" = ' "SWITCH WHEN FOCUS"' ]; then
+	focusmode=$(xprop -root _NIHWM_FOCUS_CHANGE | cut -d"=" -f2)
+	if [ "$focusmode" = ' 1' ]; then
 		focusmode='F'
 	else
 		focusmode=''
 	fi
+
+	# Compositor
+	compositoractive=$(xprop -root _NIHWM_USING_COMPOSITOR | cut -d"=" -f2)
+	if [ "$compositoractive" = ' 1' ]; then
+		compositoractive='@'
+	else
+		compositoractive=''
+	fi
+	
 
 	# Battery checker
 	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
@@ -102,7 +108,7 @@ do
 	fi
 
 	# 
-	! xsetroot -name "[${caps}${nums}${focusmode}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
+	! xsetroot -name "[${caps}${nums}${focusmode}${compositoractive}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
 
 	sleep 0.1
 done

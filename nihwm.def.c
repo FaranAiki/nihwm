@@ -57,7 +57,7 @@ enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { CusNetFocusChange, CusUsingCompositor, CusLast }; /* custom atoms */
+enum { CusNetFocusChange, CusLast }; /* custom atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
@@ -215,7 +215,6 @@ static void toggletopbar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void toggletag(const Arg *arg);
 static void toggleswitchonfocus(const Arg *arg);
-static void togglecompositor(const Arg *arg);
 static void toggleview(const Arg *arg);
 static void unfocus(Client *c, int setfocus);
 static void unmanage(Client *c, int destroyed);
@@ -246,7 +245,6 @@ static Client *prevzoom = NULL;
 static const char broken[] = "broken"; /* wtf is this? */
 static char stext[256];
 static int switchonfocus = 0;
-static int iscompositoractive = 1;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -279,27 +277,19 @@ static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
 
-/* array */
-static const long stf[2][1] = {
-	{0},
-	{1},
-}; 
+/* custom net  */
+static const char * const snetfocus[2] = { "NOT SWITCH WHEN FOCUS", "SWITCH WHEN FOCUS" };
 
 /* constants */
+static const char *nihwm_reslist[]  = {"nihwm", "-no-startapp", NULL};
 static const char *nihwmctl_kill_[]  = {"killall", "nihwmctl", NULL};
 static const char *nihwmctl_start_[] = {"nihwmctl", "statusbar", NULL};
-static const char *nihwmctl_compo_kill_[] = {"killall", "picom", NULL};
-static const char *nihwmctl_compo_start_[] = {"picom", "-b", NULL};
-
-static char * const nihwm_reslist[]  = {"nihwm", "-no-startapp", NULL};
 
 // TODO optimize this
 
 /* arg */
 static const Arg nihwmctl_start = { .v = nihwmctl_start_ };
 static const Arg nihwmctl_kill = { .v = nihwmctl_kill_ };
-static const Arg nihwmctl_compo_start = { .v = nihwmctl_compo_start_ };
-static const Arg nihwmctl_compo_kill = { .v = nihwmctl_compo_kill_ };
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
@@ -1060,8 +1050,7 @@ void
 incngappx(const Arg *arg)
 {
 	if (gappx - (unsigned int) arg->i >= 0)
-		gappx += (unsigned int) arg->i;
-	arrange(selmon);
+		gappx += (unsigned int) arg->i;	
 }
 
 #ifdef XINERAMA
@@ -1689,8 +1678,7 @@ setup(void)
 
 
 	/* init customizable atoms */
-	cusatom[CusNetFocusChange] = XInternAtom(dpy, "_NIHWM_FOCUS_CHANGE", False);
-	cusatom[CusUsingCompositor] = XInternAtom(dpy, "_NIHWM_USING_COMPOSITOR", False);
+	cusatom[CusNetFocusChange] = XInternAtom(dpy, "_NET_FOCUS_CHANGE", False);
 
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
@@ -1716,10 +1704,8 @@ setup(void)
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 
 	/* custom atom initialization */
-	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[switchonfocus], 1 );
-	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[iscompositoractive], 1 );
+	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], utf8string, 8,
+		PropModeReplace, (unsigned char *) snetfocus[switchonfocus], switchonfocus ? 17 : 21 );
 
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
@@ -1843,25 +1829,12 @@ tagmon(const Arg *arg)
 void
 toggleswitchonfocus(const Arg *arg)
 {
+	Atom utf8string = XInternAtom(dpy, "UTF8_STRING", False);
+
 	switchonfocus = !switchonfocus;
 
-	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)stf[switchonfocus], 1);
-}
-
-void
-togglecompositor(const Arg *arg)
-{
-	iscompositoractive = !iscompositoractive;
-
-	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)stf[iscompositoractive], 1);
-
-	if (iscompositoractive) {
-		spawn(&nihwmctl_compo_start);
-	} else {
-		spawn(&nihwmctl_compo_kill);
-	}
+	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], utf8string, 8,
+		PropModeReplace, (unsigned char *) snetfocus[switchonfocus], switchonfocus ? 17 : 21 );
 }
 
 void
@@ -1876,10 +1849,6 @@ togglecolorsel(const Arg *arg)
 	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], 3);
-
-	// TODO automatic update when click
-	drawbar(selmon);
-	arrange(selmon);
 }
 
 void
@@ -2061,7 +2030,6 @@ updateclientdesktop(Client *c) {
 		_tag >>= 1;
 	}
 
-	// TODO is this valid? check if stack is still available after the function return
 	long data[] = { formatted };
 
 	XChangeProperty(dpy, c->win, netatom[NetWMDesktop], XA_CARDINAL, 32,
@@ -2337,7 +2305,6 @@ xerrordummy(Display *dpy, XErrorEvent *ee)
 int
 xerrorstart(Display *dpy, XErrorEvent *ee)
 {
-	// TODO enable replace current wm
 	die("nihwm: another window manager is already running");
 	return -1;
 }

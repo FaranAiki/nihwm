@@ -6,14 +6,12 @@
 
 #define LAYOUTS 
 
-// Include Layouts
-#include "layout.c"
-
 #define TRAIN_KEYBOARD_LAYOUT
 
 /* appearance */
 static const unsigned int snap      = 32;       /* snap pixel */
-static unsigned int borderpx        = 4;        /* border pixel of windows */ // not constant
+static unsigned int borderpx        = 4;        /* border pixel of windows */
+static unsigned int gappx           = 16;       /* gap pixel of the window */
 
 static int showbar                  = 1;        /* 0 means no bar */
 static int topbar                   = 1;        /* 0 means bottom bar */
@@ -51,7 +49,9 @@ static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen win
 /* other(s) */
 static const Arg startup_tag = { .ui = 1 << 8 };
 
-// TODO separate layouts to a single file
+// Include Layouts
+#include "layout.c"
+
 static const Layout layouts[] = {
 	/* symbol              arrange function */
 	{ "[]=",      tile },    /* first entry is default */
@@ -59,6 +59,7 @@ static const Layout layouts[] = {
 	{ "[M]",      monocle },
  	{ "[@]",      spiral },
  	{ "[\\]",    dwindle },
+	{ "[ ]",      gapped_tile },
 };
 
 /* Misc */
@@ -74,7 +75,7 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
 /* my own key definition */
-#define PRNSC 0x0000ff61
+#define K_printscreen 0x0000ff61
 
 /* helper for spawning shell commands (not recommended )*/
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -178,7 +179,7 @@ static Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_F10,    spawn,          {.v = decvolcmd} },
 	{ MODKEY,                       XK_F11,    spawn,          {.v = incvolcmd} },
-	{ 0,                            PRNSC,     spawn,          {.v = printscr} },	
+	{ 0,                            K_printscreen, spawn,      {.v = printscr} },	
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY,                       XK_r,      spawn,          {.v = roficmd } }, // Makes it possible to run Windows-downloaded or .desktop file(s): Saya no Uta, FL Studio, xppentablet, ....
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
@@ -190,10 +191,11 @@ static Key keys[] = {
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
-
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.015} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.015} },
-
+	{ MODKEY|ShiftMask,             XK_i,      incngappx,     {.i = +1 } },
+	{ MODKEY|ShiftMask,             XK_d,      incngappx,     {.i = -1 } },
+	
 	{ MODKEY,                       XK_Return, zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
 	{ MODKEY, 			            XK_q,      killclientsel,  {.i = 0} },
@@ -203,7 +205,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_s,      setlayout,      {.v = &layouts[3]} },
-	{ MODKEY|ShiftMask,             XK_d,      setlayout,      {.v = &layouts[4]} },
+	{ MODKEY|ShiftMask,             XK_slash,  setlayout,      {.v = &layouts[4]} },
+	{ MODKEY|ShiftMask,             XK_t,      setlayout,      {.v = &layouts[5]} },
 
 	{ MODKEY,                       XK_space,  setlayout,      {0} },
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
@@ -229,10 +232,9 @@ static Key keys[] = {
 	{ MODKEY|ControlMask|ShiftMask, XK_s,      spawn,          {.v = shutdowncmd} }, // Graceful shutdown
 	{ MODKEY|ControlMask|ShiftMask, XK_r,      spawn,          {.v = rebootcmd} }, // Graceful shutdown
 
+	{ MODKEY,                       XK_c,      togglecolorsel, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
+	{ MODKEY|ShiftMask,             XK_c,      togglecompositor, {0} }, // don't use compositor
 	{ MODKEY|ShiftMask,             XK_f,      toggleswitchonfocus, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
-	{ MODKEY|ShiftMask,             XK_c,      togglecolorsel, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
-	/* { MODKEY|ShiftMask,             XK_i,      incnborder,     {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_d,      incnborder,     {.i = -1 } }, */
 
 #ifdef TRAIN_KEYBOARD_LAYOUT
 	{ MODKEY,                       XK_F1,     spawn,          {.v = xkbqwerty}}, 	
@@ -248,7 +250,7 @@ static Key keys[] = {
 static Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
-	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
+	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} }, // TODO disable this
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkWinTitle,          0,              Button4,        focusstack,     {.i = +1 } }, // Scroll up
 	{ ClkWinTitle,          0,              Button5,        focusstack,     {.i = -1 } }, // Scroll down
