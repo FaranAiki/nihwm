@@ -1,8 +1,10 @@
 .git_push
 .git-push
-.o
-.rej
-.orig
+
+*.o
+*.rej
+*.orig
+
 nihwm
 
 patch/
