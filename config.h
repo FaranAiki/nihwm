@@ -53,6 +53,7 @@ static const Arg startup_tag = { .ui = 1 << 8 };
 // Include Layouts
 #include "layout.c"
 
+/* to add your own layout, use the layout.c */
 static const Layout layouts[] = {
 	/* symbol              arrange function */
 	{ "[]=",      tile },    /* first entry is default */
@@ -63,6 +64,7 @@ static const Layout layouts[] = {
  	{ "TTT",      bstack },
  	{ "===",      bstackhoriz },
  	{ "GGG",      grid },
+ 	{ "[D]",      deck },
 };
 
 /* Misc */
@@ -211,7 +213,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_slash,  setlayout,      {.v = &layouts[4]} },
 	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[5]} },
 	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[6]} }, // TODO modify properly
-	{ MODKEY,                       XK_g,      setlayout,      {.v = &layouts[7]} }, // TODO modify properly
+	{ MODKEY,                       XK_g,      setlayout,      {.v = &layouts[7]} },
+	{ MODKEY,                       XK_r,      setlayout,      {.v = &layouts[8]} }, // TODO modify properly
 
 	{ MODKEY,                       XK_space,  setlayout,         {0} },
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating,    {0} },

@@ -1,5 +1,8 @@
 .git_push
 .git-push
+.o
+.rej
+.orig
 
 patch/
 patches/
