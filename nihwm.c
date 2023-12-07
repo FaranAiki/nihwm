@@ -12,6 +12,9 @@
  * Some patches are manually coded! -_- ( like 10-more-ewmhs.diff )
  */
 
+/* macro definitions for include headers  */
+#define XK_TECHNICAL
+
 #include <errno.h>
 #include <locale.h>
 #include <signal.h>
@@ -44,8 +47,8 @@
 #define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
-#define WIDTH(X)                ((X)->w + 2 * (X)->bw)
-#define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
+#define WIDTH(X)                ((X)->w + 2 * (X)->bw + gappx)
+#define HEIGHT(X)               ((X)->h + 2 * (X)->bw + gappx)
 #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 
@@ -57,7 +60,7 @@ enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { CusNetFocusChange, CusUsingCompositor, CusLast }; /* custom atoms */
+enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusLast }; /* custom atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
@@ -86,7 +89,7 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
 	int bw, oldbw;
 	unsigned int tags;
-	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
+	int isfixed, iscentered, isfloating, isalwaysontop, isurgent, neverfocus, oldstate, isfullscreen;
 	Client *next;
 	Client *snext;
 	Monitor *mon;
@@ -142,6 +145,8 @@ static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interac
 static void arrange(Monitor *m);
 static void arrangemon(Monitor *m);
 static void attach(Client *c);
+static void attachbelow(Client *c);
+static void toggleattachbelow();
 static void attachstack(Client *c);
 static void buttonpress(XEvent *e);
 static void checkotherwm(void);
@@ -213,6 +218,7 @@ static void togglebar(const Arg *arg);
 static void togglecolorsel(const Arg *arg);
 static void toggletopbar(const Arg *arg);
 static void togglefloating(const Arg *arg);
+static void togglealwaysontop(const Arg *arg);
 static void toggletag(const Arg *arg);
 static void toggleswitchonfocus(const Arg *arg);
 static void togglecompositor(const Arg *arg);
@@ -441,6 +447,21 @@ attach(Client *c)
 {
 	c->next = c->mon->clients;
 	c->mon->clients = c;
+}
+void
+attachbelow(Client *c)
+{
+	//If there is nothing on the monitor or the selected client is floating, attach as normal
+	if(c->mon->sel == NULL || c->mon->sel == c || c->mon->sel->isfloating) {
+		attach(c);
+		return;
+	}
+
+	//Set the new client's next property to the same as the currently selected clients next
+	c->next = c->mon->sel->next;
+	//Set the currently selected clients next property to the new client
+	c->mon->sel->next = c;
+
 }
 
 void
@@ -807,8 +828,11 @@ drawbar(Monitor *m)
 		if (m->sel) {
 			drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
 			drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
-			if (m->sel->isfloating)
+			if (m->sel->isfloating) {
 				drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
+				if (m->sel->isalwaysontop)
+					drw_rect(drw, x + boxs, bh - boxw, boxw, boxw, 0, 0);
+			}
 		} else {
 			drw_setscheme(drw, scheme[SchemeNorm]);
 			drw_rect(drw, x, 0, w, bh, 1, 1);
@@ -1059,7 +1083,7 @@ incnmaster(const Arg *arg)
 void
 incngappx(const Arg *arg)
 {
-	if (gappx - (unsigned int) arg->i >= 0)
+	if ((int) gappx >= -(int) arg->i)
 		gappx += (unsigned int) arg->i;
 	arrange(selmon);
 }
@@ -1180,7 +1204,10 @@ manage(Window w, XWindowAttributes *wa)
 		c->isfloating = c->oldstate = trans != None || c->isfixed;
 	if (c->isfloating)
 		XRaiseWindow(dpy, c->win);
-	attach(c);
+	if( isattachbelow )
+		attachbelow(c);
+	else
+		attach(c);
 	attachstack(c);
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
@@ -1381,12 +1408,34 @@ void
 resizeclient(Client *c, int x, int y, int w, int h)
 {
 	XWindowChanges wc;
+	unsigned int n, gapoffset, gapincr;
+	Client *nbc;
 
-	c->oldx = c->x; c->x = wc.x = x;
-	c->oldy = c->y; c->y = wc.y = y;
-	c->oldw = c->w; c->w = wc.width = w;
-	c->oldh = c->h; c->h = wc.height = h;
 	wc.border_width = c->bw;
+
+ 	/* Get number of clients for the selected monitor */
+ 	for (n = 0, nbc = nexttiled(selmon->clients); nbc; nbc = nexttiled(nbc->next), n++);
+ 
+ 	/* Do nothing if layout is floating */
+ 	if (c->isfloating || selmon->lt[selmon->sellt]->arrange == NULL) {
+ 		gapincr = gapoffset = 0;
+ 	} else {
+ 		/* Remove border and gap if layout is monocle or only one client */
+ 		if (selmon->lt[selmon->sellt]->arrange == monocle || n == 1) {
+ 			gapoffset = 0;
+ 			gapincr = -2 * borderpx;
+ 			wc.border_width = 0;
+ 		} else {
+ 			gapoffset = gappx;
+ 			gapincr = 2 * gappx;
+ 		}
+ 	}
+ 
+ 	c->oldx = c->x; c->x = wc.x = x + gapoffset;
+ 	c->oldy = c->y; c->y = wc.y = y + gapoffset;
+ 	c->oldw = c->w; c->w = wc.width = w - gapincr;
+ 	c->oldh = c->h; c->h = wc.height = h - gapincr;
+
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
 	XSync(dpy, False);
@@ -1461,6 +1510,17 @@ restack(Monitor *m)
 		return;
 	if (m->sel->isfloating || !m->lt[m->sellt]->arrange)
 		XRaiseWindow(dpy, m->sel->win);
+
+	/* raise the aot window */
+	for(Monitor *m_search = mons; m_search; m_search = m_search->next){
+		for(c = m_search->clients; c; c = c->next){
+			if(c->isalwaysontop){
+				XRaiseWindow(dpy, c->win);
+				break;
+			}
+		}
+	}
+
 	if (m->lt[m->sellt]->arrange) {
 		wc.stack_mode = Below;
 		wc.sibling = m->barwin;
@@ -1691,6 +1751,7 @@ setup(void)
 	/* init customizable atoms */
 	cusatom[CusNetFocusChange] = XInternAtom(dpy, "_NIHWM_FOCUS_CHANGE", False);
 	cusatom[CusUsingCompositor] = XInternAtom(dpy, "_NIHWM_USING_COMPOSITOR", False);
+	cusatom[CusAttachBelow] = XInternAtom(dpy, "_NIHWM_ATTACH_BELOW", False);
 
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
@@ -1720,6 +1781,8 @@ setup(void)
 		PropModeReplace, (unsigned char *) stf[switchonfocus], 1 );
 	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[iscompositoractive], 1 );
+	XChangeProperty(dpy, root, cusatom[CusAttachBelow], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[isattachbelow], 1 );
 
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
@@ -1840,13 +1903,21 @@ tagmon(const Arg *arg)
 	sendmon(selmon->sel, dirtomon(arg->i));
 }
 
+void toggleattachbelow()
+{
+	isattachbelow = !isattachbelow;
+	
+	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[isattachbelow], 1 );	
+}
+
 void
 toggleswitchonfocus(const Arg *arg)
 {
 	switchonfocus = !switchonfocus;
 
 	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)stf[switchonfocus], 1);
+			PropModeReplace, (unsigned char *) stf[switchonfocus], 1);
 }
 
 void
@@ -1854,8 +1925,8 @@ togglecompositor(const Arg *arg)
 {
 	iscompositoractive = !iscompositoractive;
 
-	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)stf[iscompositoractive], 1);
+	XChangeProperty(dpy, root, cusatom[CusAttachBelow], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) stf[iscompositoractive], 1);
 
 	if (iscompositoractive) {
 		spawn(&nihwmctl_compo_start);
@@ -1911,6 +1982,32 @@ togglefloating(const Arg *arg)
 	if (selmon->sel->isfloating)
 		resize(selmon->sel, selmon->sel->x, selmon->sel->y,
 			selmon->sel->w, selmon->sel->h, 0);
+	else
+		selmon->sel->isalwaysontop = 0; /* disabled, turn this off too */
+	arrange(selmon);
+}
+
+void
+togglealwaysontop(const Arg *arg)
+{
+	if (!selmon->sel)
+		return;
+	if (selmon->sel->isfullscreen)
+		return;
+
+	if(selmon->sel->isalwaysontop){
+		selmon->sel->isalwaysontop = 0;
+	}else{
+		/* disable others */
+		for(Monitor *m = mons; m; m = m->next)
+			for(Client *c = m->clients; c; c = c->next)
+				c->isalwaysontop = 0;
+
+		/* turn on, make it float too */
+		selmon->sel->isfloating = 1;
+		selmon->sel->isalwaysontop = 1;
+	}
+
 	arrange(selmon);
 }
 
@@ -2381,8 +2478,7 @@ main(int argc, char *argv[])
 	if (pledge("stdio rpath proc exec", NULL) == -1)
 		die("pledge");
 #endif /* __OpenBSD__ */
-	// using || as a lazy checker
-	//
+	
 	spawn(&nihwmctl_start);
 	if (argc == 1 || strcmp("-no-startapp", argv[1]) != 0) startapp(); // auto start application
 

@@ -11,7 +11,7 @@
 # Should I use C? The lazy thing is that I am not sure if
 # combining C with programs/forking is a good idea
 
-
+# TODO make this unbloated
 
 battery_notified=false
 
@@ -99,7 +99,14 @@ do
 	else
 		compositoractive=''
 	fi
-	
+
+	# Attach below
+	attachbelow=$(xprop -root _NIHWM_ATTACH_BELOW | cut -d"=" -f2)
+	if [ "$attachbelow" = ' 1' ]; then
+		attachbelow='a'
+	else
+		attachbelow=''
+	fi
 
 	# Battery checker
 	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
@@ -108,7 +115,7 @@ do
 	fi
 
 	# 
-	! xsetroot -name "[${caps}${nums}${focusmode}${compositoractive}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
+	! xsetroot -name "[${caps}${nums}${focusmode}${compositoractive}${attachbelow}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
 
 	sleep 0.1
 done

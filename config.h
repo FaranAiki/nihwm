@@ -41,10 +41,11 @@ static const char *colors[][3]      = {
 static const char *tags[] = { "曲", "捜", "歌", "開", "操", "愛", "録", "描", "電" };
 
 /* layout(s) */
-static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
-static const int nmaster     = 1;    /* number of clients in master area */
-static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
-static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
+static const float mfact         = 0.5; /* factor of master area size [0.05..0.95] */
+static const int nmaster         = 1;    /* number of clients in master area */
+static const int resizehints     = 1;    /* 1 means respect size hints in tiled resizals */
+static const int lockfullscreen  = 1; /* 1 will force focus on the fullscreen window */
+static int isattachbelow         = 1; /* 1 means attach at the end [nonmaster, decreasing] */
 
 /* other(s) */
 static const Arg startup_tag = { .ui = 1 << 8 };
@@ -58,20 +59,22 @@ static const Layout layouts[] = {
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
  	{ "[@]",      spiral },
- 	{ "[\\]",    dwindle },
-	{ "[ ]",      gapped_tile },
+ 	{ "[\\]",     dwindle },
+ 	{ "TTT",      bstack },
+ 	{ "===",      bstackhoriz },
+ 	{ "GGG",      grid },
 };
 
 /* Misc */
 #define USEDTERMINAL "kitty"
 
 /* TAGKEYS is the proof that `define` macros are useful, Terry Davis! (RIP THE LEGEND) */
-/* key definitions */
+/* key definitions (toggleview and tag is inverted)*/
 #define MODKEY Mod4Mask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
-	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
+	{ MODKEY|ShiftMask,             KEY,      toggleview,     {.ui = 1 << TAG} }, \
+	{ MODKEY|ControlMask,           KEY,      tag,            {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
 /* my own key definition */
@@ -108,7 +111,7 @@ static const char *xkbqwerty[] = { "setxkbmap", "us", NULL };
 static const char *xkbdvorak[] = { "setxkbmap", "us", "-variant", "dvorak", NULL };
 static const char *xkbcolemak[] = { "setxkbmap", "us", "-variant", "colemak", NULL };
 static const char *xkbarabic[] = { "setxkbmap", "ara", NULL };
-static const char *xkbjapanese[] = { "setxkbmap", "ara", NULL };
+static const char *xkbjapanese[] = { "setxkbmap", "jp", NULL };
 
 /* startup */
 static const char **startup[] = {
@@ -193,8 +196,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.015} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.015} },
-	{ MODKEY|ShiftMask,             XK_i,      incngappx,     {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_d,      incngappx,     {.i = -1 } },
+	{ MODKEY,                       XK_bracketleft,  incngappx, {.i = -2 } },
+	{ MODKEY,                       XK_bracketright, incngappx, {.i = +2 } },
 	
 	{ MODKEY,                       XK_Return, zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
@@ -205,11 +208,14 @@ static Key keys[] = {
 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_s,      setlayout,      {.v = &layouts[3]} },
-	{ MODKEY|ShiftMask,             XK_slash,  setlayout,      {.v = &layouts[4]} },
-	{ MODKEY|ShiftMask,             XK_t,      setlayout,      {.v = &layouts[5]} },
+	{ MODKEY,                       XK_slash,  setlayout,      {.v = &layouts[4]} },
+	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[5]} },
+	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[6]} }, // TODO modify properly
+	{ MODKEY,                       XK_g,      setlayout,      {.v = &layouts[7]} }, // TODO modify properly
 
-	{ MODKEY,                       XK_space,  setlayout,      {0} },
-	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
+	{ MODKEY,                       XK_space,  setlayout,         {0} },
+	{ MODKEY|ShiftMask,             XK_space,  togglefloating,    {0} },
+	{ MODKEY|ControlMask,           XK_space,  togglealwaysontop, {0} },
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
 	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
@@ -227,14 +233,15 @@ static Key keys[] = {
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
 
-	{ MODKEY|ControlMask,           XK_q,      quit,           {0} },
-	{ MODKEY|ControlMask|ShiftMask, XK_q,      quit,           {1} },
+	{ MODKEY|ControlMask,           XK_q,      quit,           {1} },
+	{ MODKEY|ControlMask|ShiftMask, XK_q,      quit,           {0} },
 	{ MODKEY|ControlMask|ShiftMask, XK_s,      spawn,          {.v = shutdowncmd} }, // Graceful shutdown
 	{ MODKEY|ControlMask|ShiftMask, XK_r,      spawn,          {.v = rebootcmd} }, // Graceful shutdown
 
 	{ MODKEY,                       XK_c,      togglecolorsel, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
 	{ MODKEY|ShiftMask,             XK_c,      togglecompositor, {0} }, // don't use compositor
 	{ MODKEY|ShiftMask,             XK_f,      toggleswitchonfocus, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
+	{ MODKEY|ShiftMask,             XK_a,      toggleattachbelow, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
 
 #ifdef TRAIN_KEYBOARD_LAYOUT
 	{ MODKEY,                       XK_F1,     spawn,          {.v = xkbqwerty}}, 	
