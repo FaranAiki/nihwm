@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=nih
+DesktopNames=nih
+Comment=nih is desktop environment to complete nihwm.
+Exec=nih
+Icon=nihwm.png
+Type=XSession

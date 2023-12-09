@@ -60,7 +60,7 @@ enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusLast }; /* custom atoms */
+enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating, CusLast }; /* custom atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
@@ -146,7 +146,6 @@ static void arrange(Monitor *m);
 static void arrangemon(Monitor *m);
 static void attach(Client *c);
 static void attachbelow(Client *c);
-static void toggleattachbelow();
 static void attachstack(Client *c);
 static void buttonpress(XEvent *e);
 static void checkotherwm(void);
@@ -214,6 +213,8 @@ static void spawn(const Arg *arg);
 static void startapp(void);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
+static void toggleattachbelow(const Arg *arg);
+static void toggleallownextfloating(const Arg *arg);
 static void togglebar(const Arg *arg);
 static void togglecolorsel(const Arg *arg);
 static void toggletopbar(const Arg *arg);
@@ -951,17 +952,20 @@ focusstack(const Arg *arg)
 			for (c = selmon->clients; c && !ISVISIBLE(c); c = c->next);
 	} else {
 		for (i = selmon->clients; i != selmon->sel; i = i->next)
-			if (ISVISIBLE(i))
+			if (i && ISVISIBLE(i) && !(i->isfloating && !allownextfloating))
 				c = i;
 		if (!c)
 			for (; i; i = i->next)
-				if (ISVISIBLE(i))
+				if (i && ISVISIBLE(i))
 					c = i;
 	}
-	if (c) {
+
+	if (c) {	
 		focus(c);
 		restack(selmon);
 	}
+
+	if (c->isfloating && !allownextfloating) focusstack(arg);
 }
 
 Atom
@@ -1323,6 +1327,7 @@ movemouse(const Arg *arg)
 	}
 }
 
+// TODO fix for allownextfloat
 Client *
 nexttiled(Client *c)
 {
@@ -1752,6 +1757,7 @@ setup(void)
 	cusatom[CusNetFocusChange] = XInternAtom(dpy, "_NIHWM_FOCUS_CHANGE", False);
 	cusatom[CusUsingCompositor] = XInternAtom(dpy, "_NIHWM_USING_COMPOSITOR", False);
 	cusatom[CusAttachBelow] = XInternAtom(dpy, "_NIHWM_ATTACH_BELOW", False);
+	cusatom[CusAllowNextFloating] = XInternAtom(dpy, "_NIHWM_ALLOW_NEXT_FLOATING", False);
 
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
@@ -1764,7 +1770,7 @@ setup(void)
 		scheme[i] = drw_scm_create(drw, colors[i], 3);
 
 	/* init bars */
-	updatebars(); /* non nihwm status */ 
+	updatebars(); /* non-nihwm status */ 
 	updatestatus();
 
 	/* supporting window for NetWMCheck */
@@ -1783,6 +1789,8 @@ setup(void)
 		PropModeReplace, (unsigned char *) stf[iscompositoractive], 1 );
 	XChangeProperty(dpy, root, cusatom[CusAttachBelow], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[isattachbelow], 1 );
+	XChangeProperty(dpy, root, cusatom[CusAllowNextFloating], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[allownextfloating], 1 );	
 
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
@@ -1903,11 +1911,22 @@ tagmon(const Arg *arg)
 	sendmon(selmon->sel, dirtomon(arg->i));
 }
 
-void toggleattachbelow()
+
+void
+toggleallownextfloating(const Arg *arg)
+{
+	allownextfloating = !allownextfloating;
+
+	XChangeProperty(dpy, root, cusatom[CusAllowNextFloating], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[allownextfloating], 1 );	
+}
+
+void
+toggleattachbelow(const Arg *arg)
 {
 	isattachbelow = !isattachbelow;
 	
-	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
+	XChangeProperty(dpy, root, cusatom[CusAttachBelow], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[isattachbelow], 1 );	
 }
 
@@ -1925,7 +1944,7 @@ togglecompositor(const Arg *arg)
 {
 	iscompositoractive = !iscompositoractive;
 
-	XChangeProperty(dpy, root, cusatom[CusAttachBelow], XA_CARDINAL, 32,
+	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) stf[iscompositoractive], 1);
 
 	if (iscompositoractive) {
@@ -2463,15 +2482,17 @@ main(int argc, char *argv[])
 	if (argc == 2 && !strcmp("-v", argv[1]))
 		die("nihwm-"VERSION);
 	else if (argc == 2 && !strcmp("-h", argv[1]))
-		die("usage: nihwm [-v] or nihwm [-no-startapp]");
+		die("usage: nihwm [-v] or nihwm [-no-startapp] or nihwm [-replace]");
 
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
 	
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("nihwm: cannot open display");
+
+	if (argc >= 2 && strcmp("-replace", argv[1]))
+		checkotherwm();
 	
-	checkotherwm();
 	setup();
 
 #ifdef __OpenBSD__

@@ -22,6 +22,8 @@ iscommand() {
 	fi
 }
 
+# TODO optimize this
+
 graceful_close() {
 
 rofi -show window -theme nihwm-theme &
@@ -57,6 +59,7 @@ graceful_close
 
 shutdown r -P 0
 
+## THIS IS WHERE NIHWM's STATUSBAR is DEFINED ##
 elif [ "$1" = "statusbar" ]; then # STATUSBAR
 
 while true
@@ -108,6 +111,14 @@ do
 		attachbelow=''
 	fi
 
+	# Allow next floating
+	allownextfloating=$(xprop -root _NIHWM_ALLOW_NEXT_FLOATING | cut -d"=" -f2)
+	if [ "$allownextfloating" = ' 1' ]; then
+		allownextfloating='_'
+	else
+		allownextfloating=''
+	fi
+
 	# Battery checker
 	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
 		notify-send --urgency=critical -t 0 --icon=battery "Battery is low" "<span font='50px'>Please charge your Laptop's battery or use the cable while your laptop is still on.</span>"
@@ -115,7 +126,7 @@ do
 	fi
 
 	# 
-	! xsetroot -name "[${caps}${nums}${focusmode}${compositoractive}${attachbelow}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
+	! xsetroot -name "[${allownextfloating}${caps}${nums}${focusmode}${compositoractive}${attachbelow}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
 
 	sleep 0.1
 done

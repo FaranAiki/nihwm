@@ -46,6 +46,7 @@ static const int nmaster         = 1;    /* number of clients in master area */
 static const int resizehints     = 1;    /* 1 means respect size hints in tiled resizals */
 static const int lockfullscreen  = 1; /* 1 will force focus on the fullscreen window */
 static int isattachbelow         = 1; /* 1 means attach at the end [nonmaster, decreasing] */
+static int allownextfloating     = 0; /* 1 means focusstack allows next window to be floating */
 
 /* other(s) */
 static const Arg startup_tag = { .ui = 1 << 8 };
@@ -180,6 +181,7 @@ static const Rule rules[] = {
 // 9 -> Terminal				(Kitty, Alacritty)
 
 /* this is where the keys are defined */
+/* TODO implement a system where it is possible to use arrow keys, undescore, .etc */
 static Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_F10,    spawn,          {.v = decvolcmd} },
@@ -214,7 +216,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[5]} },
 	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[6]} }, // TODO modify properly
 	{ MODKEY,                       XK_g,      setlayout,      {.v = &layouts[7]} },
-	{ MODKEY,                       XK_r,      setlayout,      {.v = &layouts[8]} }, // TODO modify properly
+	{ MODKEY|ShiftMask,             XK_d,      setlayout,      {.v = &layouts[8]} }, 
 
 	{ MODKEY,                       XK_space,  setlayout,         {0} },
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating,    {0} },
@@ -241,10 +243,11 @@ static Key keys[] = {
 	{ MODKEY|ControlMask|ShiftMask, XK_s,      spawn,          {.v = shutdowncmd} }, // Graceful shutdown
 	{ MODKEY|ControlMask|ShiftMask, XK_r,      spawn,          {.v = rebootcmd} }, // Graceful shutdown
 
-	{ MODKEY,                       XK_c,      togglecolorsel, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
-	{ MODKEY|ShiftMask,             XK_c,      togglecompositor, {0} }, // don't use compositor
-	{ MODKEY|ShiftMask,             XK_f,      toggleswitchonfocus, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
-	{ MODKEY|ShiftMask,             XK_a,      toggleattachbelow, {0} }, // switch on focus = 0 means that we ignore if a popup exists, or something similar like that
+	{ MODKEY,                       XK_c,      togglecolorsel, {0} }, // color selection
+	{ MODKEY|ControlMask,           XK_f,      toggleallownextfloating, {0} }, // disallow/allow mod+j or mod+k or similar to be focused
+	{ MODKEY|ShiftMask,             XK_c,      togglecompositor, {0} }, // use/don't use compositor
+	{ MODKEY|ShiftMask,             XK_f,      toggleswitchonfocus, {0} }, // ignore popup focus
+	{ MODKEY|ShiftMask,             XK_a,      toggleattachbelow, {0} },
 
 #ifdef TRAIN_KEYBOARD_LAYOUT
 	{ MODKEY,                       XK_F1,     spawn,          {.v = xkbqwerty}}, 	

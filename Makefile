@@ -41,8 +41,10 @@ install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f nihwm ${DESTDIR}${PREFIX}/bin
 	cp -f nihwmctl ${DESTDIR}${PREFIX}/bin
+	cp -f nih ${DESTDIR}${PREFIX}/bin
 	chmod 755 ${DESTDIR}${PREFIX}/bin/nihwm
 	chmod 755 ${DESTDIR}${PREFIX}/bin/nihwmctl
+	chmod 755 ${DESTDIR}${PREFIX}/bin/nih
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < nihwm.1 > ${DESTDIR}${MANPREFIX}/man1/nihwm.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/nihwm.1
@@ -50,6 +52,9 @@ install: all
 	mkdir -p /usr/share/xsessions
 	cp -f nihwm.desktop /usr/share/xsessions
 	chmod 644 /usr/share/xsessions/nihwm.desktop
+	
+	cp -f nih.desktop /usr/share/xsessions
+	chmod 644 /usr/share/xsessions/nih.desktop
 	
 	mkdir -p ${CONFIG}/rofi
 	cp -f nihwm-theme.rasi ${CONFIG}/rofi	
