@@ -14,6 +14,7 @@ options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
+	@echo "INSTALL  = ${INSTALL}"
 
 .c.o:
 	${CC} -c ${CFLAGS} $<
@@ -49,12 +50,12 @@ install: all
 	sed "s/VERSION/${VERSION}/g" < nihwm.1 > ${DESTDIR}${MANPREFIX}/man1/nihwm.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/nihwm.1
 	
-	mkdir -p /usr/share/xsessions
-	cp -f nihwm.desktop /usr/share/xsessions
-	chmod 644 /usr/share/xsessions/nihwm.desktop
+	mkdir -p ${INSTALL}/usr/share/xsessions
+	cp -f nihwm.desktop ${INSTALL}/usr/share/xsessions
+	chmod 644 ${INSTALL}/usr/share/xsessions/nihwm.desktop
 	
-	cp -f nih.desktop /usr/share/xsessions
-	chmod 644 /usr/share/xsessions/nih.desktop
+	cp -f nih.desktop ${INSTALL}/usr/share/xsessions
+	chmod 644 ${INSTALL}/usr/share/xsessions/nih.desktop
 	
 	mkdir -p ${CONFIG}/rofi
 	cp -f nihwm-theme.rasi ${CONFIG}/rofi	

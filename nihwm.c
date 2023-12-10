@@ -53,6 +53,8 @@
 #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 
+#define SSWITCH(V)              if (arg->i == -1) V = !V; else V = arg->i & 1
+
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel }; /* color schemes */
@@ -61,7 +63,7 @@ enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetWMMoveResize, NetMoveResizeWindow, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating, CusShowOverlay, CusLast }; /* custom atoms */
+enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating, CusShowOverlay, CusIgnoreMasterFocus, CusLast }; /* custom atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
@@ -78,6 +80,7 @@ typedef struct {
 	unsigned int button;
 	void (*func)(const Arg *arg);
 	const Arg arg;
+	const int disable;
 } Button;
 
 typedef struct Monitor Monitor;
@@ -103,6 +106,7 @@ typedef struct {
 	KeySym keysym;
 	void (*func)(const Arg *);
 	const Arg arg;
+	const int disable;
 } Key;
 
 typedef struct {
@@ -222,6 +226,7 @@ static void toggleallownextfloating(const Arg *arg);
 static void togglebar(const Arg *arg);
 static void togglecolorsel(const Arg *arg);
 static void toggleoverlay(const Arg *arg);
+static void toggleignoremasterfocus(const Arg *arg); // TODO port this to another file
 static void toggletopbar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglealwaysontop(const Arg *arg);
@@ -950,6 +955,7 @@ focusmon(const Arg *arg)
 }
 
 // TODO fix this problem CORRECTLY
+// TODO implement ignore master focus
 void
 focusstack(const Arg *arg)
 {
@@ -1113,8 +1119,7 @@ incnmaster(const Arg *arg)
 void
 incngappx(const Arg *arg)
 {
-	if ((int) gappx >= -(int) arg->i)
-		gappx += (unsigned int) arg->i;
+	gappx = MAX(gappx + arg->i, 0);
 	arrange(selmon);
 }
 
@@ -1813,6 +1818,7 @@ setup(void)
 	cusatom[CusAttachBelow] = XInternAtom(dpy, "_NIHWM_ATTACH_BELOW", False);
 	cusatom[CusAllowNextFloating] = XInternAtom(dpy, "_NIHWM_ALLOW_NEXT_FLOATING", False);
 	cusatom[CusShowOverlay] = XInternAtom(dpy, "_NIHWM_SHOW_OVERLAY", False);
+	cusatom[CusIgnoreMasterFocus] = XInternAtom(dpy, "_NIHWM_IGNORE_MASTER_FOCUS", False);
 
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
@@ -1848,6 +1854,8 @@ setup(void)
 		PropModeReplace, (unsigned char *) stf[allownextfloating], 1 );	
 	XChangeProperty(dpy, root, cusatom[CusShowOverlay], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[showoverlay], 1 );	
+	XChangeProperty(dpy, root, cusatom[CusIgnoreMasterFocus], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) stf[ignoremasterfocus], 1);
 
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
@@ -1972,7 +1980,7 @@ tagmon(const Arg *arg)
 void
 toggleallownextfloating(const Arg *arg)
 {
-	allownextfloating = !allownextfloating;
+	SSWITCH(allownextfloating);
 
 	XChangeProperty(dpy, root, cusatom[CusAllowNextFloating], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[allownextfloating], 1 );	
@@ -1981,8 +1989,8 @@ toggleallownextfloating(const Arg *arg)
 void
 toggleattachbelow(const Arg *arg)
 {
-	isattachbelow = !isattachbelow;
-	
+	SSWITCH(isattachbelow);
+
 	XChangeProperty(dpy, root, cusatom[CusAttachBelow], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[isattachbelow], 1 );	
 }
@@ -1990,7 +1998,7 @@ toggleattachbelow(const Arg *arg)
 void
 toggleswitchonfocus(const Arg *arg)
 {
-	switchonfocus = !switchonfocus;
+	SSWITCH(switchonfocus);
 
 	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) stf[switchonfocus], 1);
@@ -1999,7 +2007,7 @@ toggleswitchonfocus(const Arg *arg)
 void
 togglecompositor(const Arg *arg)
 {
-	iscompositoractive = !iscompositoractive;
+	SSWITCH(iscompositoractive);
 
 	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) stf[iscompositoractive], 1);
@@ -2014,7 +2022,7 @@ togglecompositor(const Arg *arg)
 void
 toggleoverlay(const Arg *arg)
 {
-	showoverlay = !showoverlay;
+	SSWITCH(showoverlay);	
 	
 	XChangeProperty(dpy, root, cusatom[CusShowOverlay], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) stf[showoverlay], 1);
@@ -2025,6 +2033,16 @@ toggleoverlay(const Arg *arg)
 	}
 
 	arrange(selmon);
+}
+
+
+void
+toggleignoremasterfocus(const Arg *arg)
+{
+	SSWITCH(ignoremasterfocus);
+
+	XChangeProperty(dpy, root, cusatom[CusIgnoreMasterFocus], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) stf[ignoremasterfocus], 1);	
 }
 
 void
@@ -2041,7 +2059,8 @@ togglecolorsel(const Arg *arg)
 void
 togglebar(const Arg *arg)
 {
-	selmon->showbar = !selmon->showbar;
+	SSWITCH(selmon->showbar);
+
 	updatebarpos(selmon);
 	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
 	arrange(selmon);
@@ -2050,7 +2069,8 @@ togglebar(const Arg *arg)
 void
 toggletopbar(const Arg *arg)
 {
-	selmon->topbar = !selmon->topbar;
+	SSWITCH(selmon->topbar);
+
 	updatebarpos(selmon);
 	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
 	arrange(selmon);

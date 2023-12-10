@@ -4,9 +4,9 @@ VERSION = 0.12
 # Customize below to fit your system
 
 # paths
-PREFIX = /usr/local
+PREFIX = ${INSTALL}/usr/local
 MANPREFIX = ${PREFIX}/share/man
-CONFIG = /home/${SUDO_USER}/.config
+CONFIG = ${INSTALL}/home/${SUDO_USER}/.config
 
 X11INC = /usr/X11R6/include
 X11LIB = /usr/X11R6/lib
@@ -37,4 +37,4 @@ LDFLAGS  = ${LIBS}
 #LDFLAGS = ${LIBS}
 
 # compiler and linker
-CC = clang
+CC = gcc

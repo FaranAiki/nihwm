@@ -127,6 +127,14 @@ do
 		showoverlay=''
 	fi
 
+	# Ignore master focus in stack
+	ignoremasterfocus=$(xprop -root _NIHWM_IGNORE_MASTER_FOCUS | cut -d"=" -f2)
+	if [ "$ignoremasterfocus" = ' 1' ]; then
+		ignoremasterfocus='M'
+	else
+		ignoremasterfocus=''
+	fi
+
 	# Battery checker
 	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
 		notify-send --urgency=critical -t 0 --icon=battery "Battery is low" "<span font='50px'>Please charge your Laptop's battery or use the cable while your laptop is still on.</span>"
@@ -134,7 +142,7 @@ do
 	fi
 
 	# All the rules, capslock, et cetera
-	condition="${nums}${caps}${showoverlay}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
+	condition="${nums}${caps}${showoverlay}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
 	
 	# Set status bar
 	! xsetroot -name "[$condition] | $(date) | ${volume} | ${battery} | nihwm" && exit 69

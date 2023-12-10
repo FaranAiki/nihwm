@@ -1,6 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* Should I separate config with another config? :3 */
+/* TODO separate config file */
 
 /* Copyright (c) Muhammad Faran Aiki 2023 */
 
@@ -41,14 +42,15 @@ static const char *colors[][3]      = {
 static const char *tags[] = { "曲", "捜", "歌", "開", "操", "愛", "録", "描", "電" };
 
 /* layout(s) */
-static const float mfact         = 0.5;  /* factor of master area size [0.05..0.95] */
-static const int nmaster         = 1;    /* number of clients in master area */
-static const int resizehints     = 1;    /* 1 means respect size hints in tiled resizals */
-static const int lockfullscreen  = 1;    /* 1 will force focus on the fullscreen window */
+static float mfact               = 0.5;  /* factor of master area size [0.05..0.95] */
+static int nmaster               = 1;    /* number of clients in master area */
+static int resizehints           = 1;    /* 1 means respect size hints in tiled resizals */
+static int lockfullscreen        = 1;    /* 1 will force focus on the fullscreen window */
 static int isattachbelow         = 1;    /* 1 means attach at the end [nonmaster, decreasing] */
 static int allownextfloating     = 0;    /* 1 means focusstack allows next window to be floating */
 static int switchonfocus         = 0;    /* 1 means change to the current window which requests a focus */
 static int iscompositoractive    = 1;    /* 1 means compositor (picom, picom-fork, nihcomp) is active */
+static int ignoremasterfocus     = 0;    /* 1 means ignore master in focusstack function, useful for deck */
 
 /* other(s) */
 static const Arg startup_tag = { .ui = 1 << 8 };
@@ -140,35 +142,35 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class            instance      title          tags mask     isfloating   monitor    is overlay */
-	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1,        0}, // ergonomic reason
-	{  "Audacity",      "audacity",   NULL,          1 << 0,       0,           -1,        0},
-	{  "OpenUtau",      "OpenUtau",   NULL,          1 << 0,       0,           -1,        0},
+	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
+	{  "Audacity",      "audacity",   NULL,          1 << 0,       0,           -1, },
+	{  "OpenUtau",      "OpenUtau",   NULL,          1 << 0,       0,           -1, },
 
-	{  "Chromium",      "chromium",   NULL,          1 << 1,       0,           -1,        0},
-	{  "firefox",       "Navigator",  NULL,          1 << 1,       0,           -1,        0},
-	{  "Opera",         "Opera",      NULL,          1 << 1,       0,           -1,        0},
+	{  "Chromium",      "chromium",   NULL,          1 << 1,       0,           -1, },
+	{  "firefox",       "Navigator",  NULL,          1 << 1,       0,           -1, },
+	{  "Opera",         "Opera",      NULL,          1 << 1,       0,           -1, },
 
 	{  "Rhythmbox",     "rhythmbox",  NULL,          1 << 2,       1,           -1,        1},
 
-	{  "Thunar",        "thunar",     NULL,          1 << 3,       0,           -1,        0},
+	{  "Thunar",        "thunar",     NULL,          1 << 3,       0,           -1, },
 
-	{  "Zathura",       "org.pwmt.zathura",   NULL,  1 << 4,       0,           -1,        0},
-	{  "Gromit-mpx",    "gromit-mpx",  NULL,         1 << 4,       0,           -1,        0},
-	{  "Pavucontrol",   "pavucontrol",  NULL,        1 << 4,       0,           -1,        0},
+	{  "Zathura",       "org.pwmt.zathura",   NULL,  1 << 4,       0,           -1, },
+	{  "Gromit-mpx",    "gromit-mpx",  NULL,         1 << 4,       0,           -1, },
+	{  "Pavucontrol",   "pavucontrol",  NULL,        1 << 4,       0,           -1, },
 
-	{  "Whatsapp-for-linux", "whatsapp-for-linux", NULL, 1 << 5,   0,           -1,        0},
-	{  "discord",       "discord",      NULL,        1 << 5,       0,           -1,        0},
-	{  "TelegramDesktop", "telegram-desktop", NULL,  1 << 5,       0,           -1,        0},
+	{  "Whatsapp-for-linux", "whatsapp-for-linux", NULL, 1 << 5,   0,           -1, },
+	{  "discord",       "discord",      NULL,        1 << 5,       0,           -1, },
+	{  "TelegramDesktop", "telegram-desktop", NULL,  1 << 5,       0,           -1, },
 
-	{  "obs",           "obs",        NULL,          1 << 6,       0,           -1,        0},
-	{  "Olive",         "olive-editor",  NULL,       1 << 6,       0,           -1,        0},
+	{  "obs",           "obs",        NULL,          1 << 6,       0,           -1, },
+	{  "Olive",         "olive-editor",  NULL,       1 << 6,       0,           -1, },
 
-	{  "krita",         "krita",      NULL,          1 << 7,       0,           -1,        0},
-	{  "Inkscape",  "org.inkscape.Inkscape", NULL,   1 << 7,       0,           -1,        0},
+	{  "krita",         "krita",      NULL,          1 << 7,       0,           -1, },
+	{  "Inkscape",  "org.inkscape.Inkscape", NULL,   1 << 7,       0,           -1, },
 
-	{  "kitty",         "kitty",   NULL,             1 << 8,       0,           -1,        0},
-	{  "Alacritty",     "Alacritty",   NULL,         1 << 8,       0,           -1,        0},
-	{  "XTerm",         "xterm",   NULL,             1 << 8,       0,           -1,        0},
+	{  "kitty",         "kitty",   NULL,             1 << 8,       0,           -1, },
+	{  "Alacritty",     "Alacritty",   NULL,         1 << 8,       0,           -1, },
+	{  "XTerm",         "xterm",   NULL,             1 << 8,       0,           -1, },
 
 	{  "Mousepad",      "mousepad",   NULL,          0,            1,           -1,        1},
 };
@@ -187,7 +189,7 @@ static const Rule rules[] = {
 /* this is where the keys are defined */
 /* TODO implement a system where it is possible to use arrow keys, undescore, .etc */
 static Key keys[] = {
-	/* event type    modifier            key        function        argument */
+	/* event type    modifier            key        function        argument            disable */
 	{ KeyPress,      MODKEY,             XK_F10,    spawn,          {.v = decvolcmd} },
 	{ KeyPress,      MODKEY,             XK_F11,    spawn,          {.v = incvolcmd} },
 	{ KeyPress,      0,                  K_printscreen, spawn,      {.v = printscr} },	
@@ -195,8 +197,8 @@ static Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_r,      spawn,          {.v = roficmd } }, // Makes it possible to run Windows-downloaded or .desktop file(s): Saya no Uta, FL Studio, xppentablet, ....
 	{ KeyPress,      MODKEY|ShiftMask,   XK_Return, spawn,          {.v = termcmd } },
 
-	{ KeyPress,      MODKEY,             XK_b,      togglebar,      {0} },
-	{ KeyPress,      MODKEY|ShiftMask,   XK_b,      toggletopbar,   {0} },
+	{ KeyPress,      MODKEY,             XK_b,      togglebar,      {-1} },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_b,      toggletopbar,   {-1} },
 	
 	{ KeyPress,      MODKEY,             XK_j,      focusstack,     {.i = +1 } },
 	{ KeyPress,      MODKEY,             XK_k,      focusstack,     {.i = -1 } },
@@ -247,11 +249,12 @@ static Key keys[] = {
 	{ KeyPress,      MODKEY|ControlMask|ShiftMask, XK_s,      spawn,          {.v = shutdowncmd} }, // Graceful shutdown
 	{ KeyPress,      MODKEY|ControlMask|ShiftMask, XK_r,      spawn,          {.v = rebootcmd} }, // Graceful shutdown
 
-	{ KeyPress,      MODKEY,             XK_c,      togglecolorsel, {0} }, // color selection
-	{ KeyPress,      MODKEY|ControlMask, XK_f,      toggleallownextfloating, {0} }, // disallow/allow mod+j or mod+k or similar to be focused
-	{ KeyPress,      MODKEY|ShiftMask,   XK_c,      togglecompositor, {0} }, // use/don't use compositor
-	{ KeyPress,      MODKEY|ShiftMask,   XK_f,      toggleswitchonfocus, {0} }, // ignore popup focus
-	{ KeyPress,      MODKEY|ShiftMask,   XK_a,      toggleattachbelow, {0} },
+	{ KeyPress,      MODKEY,             XK_c,      togglecolorsel,          {0} }, // color selection
+	{ KeyPress,      MODKEY|ControlMask, XK_f,      toggleallownextfloating, {-1} }, // disallow/allow mod+j or mod+k or similar to be focused
+	{ KeyPress,      MODKEY|ShiftMask,   XK_c,      togglecompositor,        {-1} }, // use/don't use compositor
+	{ KeyPress,      MODKEY|ShiftMask,   XK_f,      toggleswitchonfocus,     {-1} }, // ignore popup focus
+	{ KeyPress,      MODKEY|ShiftMask,   XK_a,      toggleattachbelow,       {-1} },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_m,      toggleignoremasterfocus, {-1} },
 
 #ifdef TRAIN_KEYBOARD_LAYOUT
 	{ KeyPress,      MODKEY,             XK_F1,     spawn,          {.v = xkbqwerty} }, 	
@@ -268,7 +271,7 @@ static Key keys[] = {
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
-	/* click                event mask      button          function        argument */
+	/* click                event mask      button          function        argument           disable */
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} }, // TODO disable this
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
