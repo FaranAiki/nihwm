@@ -44,7 +44,8 @@
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
                                * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
-#define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
+#define ISVISIBLEA(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
+#define ISVISIBLE(C)           (((C->tags & C->mon->tagset[C->mon->seltags]) && !(C->isoverlay && !showoverlay)) || (c->isoverlay && showoverlay))
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw + gappx)
@@ -58,9 +59,9 @@ enum { SchemeNorm, SchemeSel }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
-	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetLast }; /* EWMH atoms */
+	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetWMMoveResize, NetMoveResizeWindow, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating, CusLast }; /* custom atoms */
+enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating, CusShowOverlay, CusLast }; /* custom atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
@@ -89,7 +90,7 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
 	int bw, oldbw;
 	unsigned int tags;
-	int isfixed, iscentered, isfloating, isalwaysontop, isurgent, neverfocus, oldstate, isfullscreen;
+	int isfixed, iscentered, isfloating, isoverlay, isalwaysontop, isurgent, neverfocus, oldstate, isfullscreen;
 	Client *next;
 	Client *snext;
 	Monitor *mon;
@@ -97,6 +98,7 @@ struct Client {
 };
 
 typedef struct {
+	int type;
 	unsigned int mod;
 	KeySym keysym;
 	void (*func)(const Arg *);
@@ -137,6 +139,7 @@ typedef struct {
 	unsigned int tags;
 	int isfloating;
 	int monitor;
+	int isoverlay;
 } Rule;
 
 /* function declarations */
@@ -180,6 +183,7 @@ static void keypress(XEvent *e);
 static void killclient(const Arg *arg, const int forced);
 static void killclientsel(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
+static void makeoverlay(const Arg *arg);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
 static void motionnotify(XEvent *e);
@@ -217,6 +221,7 @@ static void toggleattachbelow(const Arg *arg);
 static void toggleallownextfloating(const Arg *arg);
 static void togglebar(const Arg *arg);
 static void togglecolorsel(const Arg *arg);
+static void toggleoverlay(const Arg *arg);
 static void toggletopbar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglealwaysontop(const Arg *arg);
@@ -252,8 +257,7 @@ static Client *lastfocused = NULL;
 static Client *prevzoom = NULL;
 static const char broken[] = "broken"; /* wtf is this? */
 static char stext[256];
-static int switchonfocus = 0;
-static int iscompositoractive = 1;
+static int showoverlay = 0;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -270,6 +274,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[Expose] = expose,
 	[FocusIn] = focusin,
 	[KeyPress] = keypress,
+	[KeyRelease] = keypress,
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
 	[MotionNotify] = motionnotify,
@@ -325,6 +330,7 @@ applyrules(Client *c)
 	XClassHint ch = { NULL, NULL };
 
 	/* rule matching */
+	c->isoverlay  = 0;
 	c->isfloating = 0;
 	c->tags = 0;
 	XGetClassHint(dpy, c->win, &ch);
@@ -337,6 +343,7 @@ applyrules(Client *c)
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->instance || strstr(instance, r->instance)))
 		{
+			c->isoverlay  = r->isoverlay;
 			c->isfloating = r->isfloating;
 			c->tags |= r->tags;
 			for (m = mons; m && m->num != r->monitor; m = m->next);
@@ -608,7 +615,7 @@ clientmessage(XEvent *e)
 	} else if (cme->message_type == netatom[NetCloseWindow]) {
 		arg.v = c;
 		if (c) killclient(&arg, 0);
-		// TODO patch this
+	// TODO patch this
 	} else if (cme->message_type == netatom[NetCurrentDesktop]) {
 		c->tags = cme->data.l[0];
 
@@ -619,6 +626,9 @@ clientmessage(XEvent *e)
 		updateclientdesktop(c);
 		focus(NULL);
 		arrange(c->mon);
+	} else if (cme->message_type == netatom[NetWMMoveResize]) {
+		arg = (Arg) {.v = c};
+		resizemouse(&arg);
 	}
 }
 
@@ -939,24 +949,39 @@ focusmon(const Arg *arg)
 	focus(NULL);
 }
 
+// TODO fix this problem CORRECTLY
 void
 focusstack(const Arg *arg)
 {
-	Client *c = NULL, *i;
+	Client *c = NULL, *i = NULL, *cur = NULL;
+	int nofloating = 1, timeout = 0;
+
+	// kind of crappy but okay, TODO make this faster
 
 	if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen))
 		return;
+
+	cur = selmon->sel;
+	
+	if (!allownextfloating)
+	for (c = selmon->sel->next; c != cur && timeout < 100; c = c->next, timeout++) {
+		if (!c) c = selmon->clients;
+		if (ISVISIBLE(c) && c->isfloating) { nofloating = 0; break; }
+	}
+
+	if (timeout == 100) return;
+
 	if (arg->i > 0) {
-		for (c = selmon->sel->next; c && !ISVISIBLE(c); c = c->next);
-		if (!c)
+		for (c = cur->next; c && !ISVISIBLE(c); c = c->next);
+		if (!c) // if it reaches the end
 			for (c = selmon->clients; c && !ISVISIBLE(c); c = c->next);
 	} else {
-		for (i = selmon->clients; i != selmon->sel; i = i->next)
-			if (i && ISVISIBLE(i) && !(i->isfloating && !allownextfloating))
+		for (i = selmon->clients; i != cur; i = i->next)
+			if (ISVISIBLE(i))
 				c = i;
-		if (!c)
+		if (!c) // if selmon->sel = selmon->clients
 			for (; i; i = i->next)
-				if (i && ISVISIBLE(i))
+				if (ISVISIBLE(i))
 					c = i;
 	}
 
@@ -965,7 +990,8 @@ focusstack(const Arg *arg)
 		restack(selmon);
 	}
 
-	if (c->isfloating && !allownextfloating) focusstack(arg);
+	// fix if there is no next floating or overlay
+	if (!nofloating && c->isfloating && !allownextfloating) focusstack(arg);
 }
 
 Atom
@@ -1116,6 +1142,7 @@ keypress(XEvent *e)
 	for (i = 0; i < LENGTH(keys); i++)
 		if (keysym == keys[i].keysym
 		&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
+		&& ev->type == keys[i].type
 		&& keys[i].func)
 			keys[i].func(&(keys[i].arg));
 }
@@ -1227,6 +1254,31 @@ manage(Window w, XWindowAttributes *wa)
 }
 
 void
+makeoverlay(const Arg *arg)
+{
+	Client *c;
+
+	if (!arg->v && selmon->sel)
+		c = selmon->sel; 
+	else if (!selmon->sel)
+		c = (Client *) arg->v;
+	else
+		return;
+
+	if (c->isoverlay) {
+		c->isoverlay = 0;
+	} else {
+		c->isoverlay = 1;
+		if (!showoverlay) {
+			unfocus(c, 1);
+			focus(NULL);
+		}
+	}
+
+	arrange(selmon);
+}
+
+void
 mappingnotify(XEvent *e)
 {
 	XMappingEvent *ev = &e->xmapping;
@@ -1327,7 +1379,7 @@ movemouse(const Arg *arg)
 	}
 }
 
-// TODO fix for allownextfloat
+// TODO fix for allownextfloat and isoverlay
 Client *
 nexttiled(Client *c)
 {
@@ -1742,6 +1794,8 @@ setup(void)
 	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
 	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
+	netatom[NetMoveResizeWindow] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
 	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
@@ -1758,6 +1812,7 @@ setup(void)
 	cusatom[CusUsingCompositor] = XInternAtom(dpy, "_NIHWM_USING_COMPOSITOR", False);
 	cusatom[CusAttachBelow] = XInternAtom(dpy, "_NIHWM_ATTACH_BELOW", False);
 	cusatom[CusAllowNextFloating] = XInternAtom(dpy, "_NIHWM_ALLOW_NEXT_FLOATING", False);
+	cusatom[CusShowOverlay] = XInternAtom(dpy, "_NIHWM_SHOW_OVERLAY", False);
 
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
@@ -1791,6 +1846,8 @@ setup(void)
 		PropModeReplace, (unsigned char *) stf[isattachbelow], 1 );
 	XChangeProperty(dpy, root, cusatom[CusAllowNextFloating], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[allownextfloating], 1 );	
+	XChangeProperty(dpy, root, cusatom[CusShowOverlay], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[showoverlay], 1 );	
 
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
@@ -1955,21 +2012,30 @@ togglecompositor(const Arg *arg)
 }
 
 void
+toggleoverlay(const Arg *arg)
+{
+	showoverlay = !showoverlay;
+	
+	XChangeProperty(dpy, root, cusatom[CusShowOverlay], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) stf[showoverlay], 1);
+
+	if (showoverlay == 0 && selmon->sel && selmon->sel->isoverlay) {
+		unfocus(selmon->sel, 1);
+		focus(NULL);
+	}
+
+	arrange(selmon);
+}
+
+void
 togglecolorsel(const Arg *arg)
 {
 	int i; // we gonna use for (i = ..) instead of for (int i = ..)
-	
-	col_sel = (col_sel + 1) % 5;
+
+	col_sel = (col_sel + 1) % LENGTH(used_color);
 	colors[SchemeSel][2] = used_color[col_sel]; // switch through color selection border
 
-	/* init appearance */
-	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i], 3);
-
-	// TODO automatic update when click
-	drawbar(selmon);
-	arrange(selmon);
+	if (selmon->sel) focus(selmon->sel);	
 }
 
 void

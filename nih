@@ -15,16 +15,17 @@ iscommand() {
 # Checking command availability
 iscommand startx
 iscommand nihwm
-#iscommand picom # TODO changea picom to nihcomp
+iscommand picom # TODO changea picom to nihcomp
 
 # Checking variables
 
+# If there is no display (at tty->nih, run startx)
 if [ -z "${DISPLAY+x}" ]; then
 	exec startx $0	
 fi
 
 if [ "$DESKTOP_SESSION" = "nih" ]; then
-	echo $0 is already running, abort.
+	echo "$0 is already running, abort."
 	exit 1
 fi
 
@@ -62,6 +63,7 @@ if [ -d /etc/X11/xinit/xinitrc.d ] ; then
  unset f
 fi
 
+# Directories
 mkdir -p $HOME/.nihwm
 
 # Export
@@ -78,6 +80,7 @@ export NIH_VERSION=$(nihwm -v)
 xset r rate 250 100 &
 
 # Configuration
+ifconfig wlan0 up &
 iwctl device wlan0 set-property Powered on &
 # mmcli device
 

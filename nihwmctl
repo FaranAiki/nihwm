@@ -119,14 +119,25 @@ do
 		allownextfloating=''
 	fi
 
+	# Allow next floating
+	showoverlay=$(xprop -root _NIHWM_SHOW_OVERLAY | cut -d"=" -f2)
+	if [ "$showoverlay" = ' 1' ]; then
+		showoverlay='w'
+	else
+		showoverlay=''
+	fi
+
 	# Battery checker
 	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
 		notify-send --urgency=critical -t 0 --icon=battery "Battery is low" "<span font='50px'>Please charge your Laptop's battery or use the cable while your laptop is still on.</span>"
 		battery_notified=true
 	fi
 
-	# 
-	! xsetroot -name "[${allownextfloating}${caps}${nums}${focusmode}${compositoractive}${attachbelow}] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
+	# All the rules, capslock, et cetera
+	condition="${nums}${caps}${showoverlay}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
+	
+	# Set status bar
+	! xsetroot -name "[$condition] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
 
 	sleep 0.1
 done
