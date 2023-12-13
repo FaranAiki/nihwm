@@ -4,6 +4,7 @@
 *.o
 *.rej
 *.orig
+*.vim
 
 nihwm
 
