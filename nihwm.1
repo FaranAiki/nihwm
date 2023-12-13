@@ -9,6 +9,9 @@ nihwm is a simply modified dwm with the purpose to make the user easier but with
 n in nihwm can be interpreted as nihilism or nihilist, but not in a sense of moral nor existence, rather art. nihwm treats artistic behavior as meaningless. Such customization like
 wallpaper et cetera. Ironically, nihwm acknowledges the existence of LMMS and Krita.
 In summary, the point of nihwm is that riced desktops are inefficient, useless. nihwm is anti unixporn; it is just a waste of time.
+The best way to learn about nihwm is to see the
+.BR code
+itself.
 .P
 In tiled layouts windows are managed in a master and stacking area. The master
 area on the left contains one window by default, and the stacking area on the
@@ -39,6 +42,12 @@ nihwm draws a small border around windows to indicate the focus state.
 .TP
 .B \-v
 prints version information to stderr, then exits.
+.TP
+.B \-no-startapp
+start nihwm without the preconfigured startup application
+.TP
+.B \-replace
+replace current window manager with nihwm (TODO implement)
 .SH USAGE
 .SS Status bar
 .TP
@@ -51,8 +60,17 @@ command.
 click on a tag label to display all windows with that tag, click on the layout
 label toggles between tiled and floating layout.
 .TP
+.B Button2
+click with the middle button (scroll)
+.TP
 .B Button3
 click on a tag label adds/removes all windows with that tag to/from the view.
+.TP
+.B Button4
+mouse scroll up, equivalent to Mod1\-j or focus next
+.TP
+.B Button5
+mouse scroll down, equivalent to Mod1\-k or focus before
 .TP
 .B Mod1\-Button1
 click on a tag label applies that tag to the focused window.
@@ -63,7 +81,7 @@ click on a tag label adds/removes that tag to/from the focused window.
 .TP
 .B Mod1\-Shift\-Return
 Start
-.BR st(1).
+.BR kitty(1).
 .TP
 .B Mod1\-p
 Spawn
@@ -89,6 +107,12 @@ Send focused window to next screen, if any.
 .B Mod1\-b
 Toggles bar on and off.
 .TP
+.B Mod1\-Shift\-b
+Toggles bar at top or below.
+.TP
+.B Mod1\-c
+Toggles border color
+.TP
 .B Mod1\-t
 Sets tiled layout.
 .TP
@@ -101,11 +125,26 @@ Sets monocle layout.
 .B Mod1\-s
 Sets fibonacci spiral layout.
 .TP
+.B Mod1\-u
+Sets bstack layout.
+.TP
+.B Mod1\-o
+Sets bstack horizontal layout.
+.TP
+.B Mod1\-g
+Sets grid layout.
+.TP
+.B Mod1\-/
+Sets fibonacci diwndle layout.
+.TP
 .B Mod1\-Shift\-d
-Sets fibonacci dwindle layout.
+Sets deck layout.
 .TP
 .B Mod1\-space
 Toggles between current and previous layout.
+.TP
+.B Mod1\-Shift\-space
+Toggles between always on top 
 .TP
 .B Mod1\-j
 Focus next window.
@@ -122,8 +161,11 @@ Increase the border pixel temporarily.
 .B Mod1\-d
 Decrease number of windows in master area.
 .TP
-.B Mod1\-Shift\-d
-Decrease the border pixel temporarily.
+.B Mod1\-]
+Increase the gap pixel between windows.
+.TP
+.B Mod1\-[
+Decrease the gap pixel between windows.
 .TP
 .B Mod1\-l
 Increase master area size.
@@ -168,10 +210,10 @@ View all windows with any tag.
 Add/remove all windows with nth tag to/from the view.
 .TP
 .B Mod1\-Control\-q
-Quit nihwm.
+Restart nihwm.
 .TP
 .B Mod1\-Control\-Shift\-q
-Restart nihwm.
+Quit (abrupt) nihwm.
 .TP
 .B Mod1\-Control\-Shift\-s
 Shutdown computer.
@@ -195,6 +237,14 @@ Toggles focused window between floating and tiled state.
 .TP
 .B Mod1\-Button3
 Resize focused window while dragging. Tiled windows will be toggled to the floating state.
+.SH RULEMODES
+Rulemodes are specific rules that nihwm use to manage the current window manager behavior.
+It can be accessed using the net atom _NIHWM_- and use
+.BR xroot
+(see the code)
+.SS KEYBOARD CONTROL
+
+.TP
 .SH CUSTOMIZATION
 nihwm is customized by creating a custom config.h and (re)compiling the source (the same nihwm) 
 code. This keeps it fast, secure and simple. However, it is not recommended to do such thing
@@ -211,6 +261,9 @@ Cleanly terminate the nihwm process.
 .BR rofi (1),
 .BR gromit-mpx (1),
 .BR st (1)
+.BR kitty (1)
+.BR nih (1)
+.BR nihwmctl (1)
 .SH ISSUES
 Java applications which use the XToolkit/XAWT backend may draw grey windows
 only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and early

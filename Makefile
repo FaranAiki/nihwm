@@ -1,10 +1,10 @@
-# nihwm - nihilist window manager
+# nihwm - nihilist window manager, fork of DWM
 # See LICENSE file for copyright and license details.
 
 include config.mk
 
 CC = gcc 
-SRC = drw.c nihwm.c util.c
+SRC = drw.c layout.c nihwm.c util.c rulemodes.c
 OBJ = ${SRC:.c=.o}
 
 all: options nihwm
@@ -19,7 +19,7 @@ options:
 .c.o:
 	${CC} -c ${CFLAGS} $<
 
-${OBJ}: config.h config.mk
+${OBJ}: config.h config.mk nihwm.h
 
 config.h:
 	cp config.def.h $@

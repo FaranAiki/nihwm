@@ -5,61 +5,46 @@
 
 /* Copyright (c) Muhammad Faran Aiki 2023 */
 
+#ifndef CONFIG_H
+	#define CONFIG_H
+
 #define LAYOUTS 
 
 #define TRAIN_KEYBOARD_LAYOUT
 
 /* appearance */
-static const unsigned int snap      = 32;       /* snap pixel */
-static unsigned int borderpx        = 4;        /* border pixel of windows */
-static unsigned int gappx           = 16;       /* gap pixel of the window */
+const unsigned int snap      = 32;       /* snap pixel */
+/* unsigned */ int borderpx  = 4;        /* border pixel of windows */
+/* unsigned */ int gappx     = 16;       /* gap pixel of the window */
 
-static int showbar                  = 1;        /* 0 means no bar */
-static int topbar                   = 1;        /* 0 means bottom bar */
+int showbar                  = 1;        /* 0 means no bar */
+int topbar                   = 1;        /* 0 means bottom bar */
 
-static const char *fonts[]          = { "monospace:size=10" };
-static const char dmenufont[]       = "monospace:size=10";
+const char *fonts[]          = { "monospace:size=10" };
+const char dmenufont[]       = "monospace:size=10";
 
-static const char col_black[]       = "#000000";
-static const char col_gray1[]       = "#222222";
-static const char col_gray2[]       = "#444444";
-static const char col_gray3[]       = "#bbbbbb";
-static const char col_gray4[]       = "#eeeeee";
-static const char col_cyan[]        = "#005577";
-static const char col_purple[]      = "#4c115a";
+const char col_black[]       = "#000000";
+const char col_gray1[]       = "#222222";
+const char col_gray2[]       = "#444444";
+const char col_gray3[]       = "#bbbbbb";
+const char col_gray4[]       = "#eeeeee";
+const char col_cyan[]        = "#005577";
+const char col_purple[]      = "#4c115a";
 
-static const char * const used_color[]     = {col_black, col_gray2, col_gray4, col_cyan, col_purple};
+/* define the color when clicking Ctrl-C */
+const char * const used_color[]     = {col_black, col_gray2, col_gray4, col_cyan, col_purple};
 
-static int col_sel = 4;
+/* metaconfig */
+int col_sel = 4;
 
-static const char *colors[][3]      = {
+const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { col_gray3, col_black, col_black },
 	[SchemeSel]  = { col_gray4, col_black, used_color[4] }, // default is 4
 };
 
-/* tagging; why japs? cuz kanji is easier */
-static const char *tags[] = { "曲", "捜", "歌", "開", "操", "愛", "録", "描", "電" };
-
-/* layout(s) */
-static float mfact               = 0.5;  /* factor of master area size [0.05..0.95] */
-static int nmaster               = 1;    /* number of clients in master area */
-static int resizehints           = 1;    /* 1 means respect size hints in tiled resizals */
-static int lockfullscreen        = 1;    /* 1 will force focus on the fullscreen window */
-static int isattachbelow         = 1;    /* 1 means attach at the end [nonmaster, decreasing] */
-static int allownextfloating     = 0;    /* 1 means focusstack allows next window to be floating */
-static int switchonfocus         = 0;    /* 1 means change to the current window which requests a focus */
-static int iscompositoractive    = 1;    /* 1 means compositor (picom, picom-fork, nihcomp) is active */
-static int ignoremasterfocus     = 0;    /* 1 means ignore master in focusstack function, useful for deck */
-
-/* other(s) */
-static const Arg startup_tag = { .ui = 1 << 8 };
-
-// Include Layouts
-#include "layout.c"
-
 /* to add your own layout, use the layout.c */
-static const Layout layouts[] = {
+const Layout layouts[] = {
 	/* symbol              arrange function */
 	{ "[]=",      tile },    /* first entry is default */
 	{ "><>",      NULL },    /* no layout function means floating behavior */
@@ -71,6 +56,21 @@ static const Layout layouts[] = {
  	{ "GGG",      grid },
  	{ "[D]",      deck },
 };
+
+/* tagging; why japs? cuz kanji is easier */
+const char *tags[] = { "曲", "捜", "歌", "開", "操", "愛", "録", "描", "電" };
+
+/* layout(s) */
+float mfact               = 0.5;  /* factor of master area size [0.05..0.95] */
+int nmaster               = 1;    /* number of clients in master area */
+int resizehints           = 1;    /* 1 means respect size hints in tiled resizals */
+int lockfullscreen        = 1;    /* 1 will force focus on the fullscreen window */
+
+/* other(s) */
+const Arg startup_tag = { .ui = 1 << 8 }; /* where do you want the startup to be */
+
+/* include everything */
+#include "layout.h"
 
 /* Misc */
 #define USEDTERMINAL "kitty"
@@ -91,38 +91,38 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-static const char *shutdowncmd[] = { "nihwmctl", "shutdown" }; 
-static const char *rebootcmd[] = { "nihwmctl", "reboot" }; // TODO implement this 
-static const char *roficmd[] = { "rofi", "-show", "drun", "-theme", "nihwm-theme", NULL };
+char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
+const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
+const char *shutdowncmd[] = { "nihwmctl", "shutdown" }; 
+const char *rebootcmd[] = { "nihwmctl", "reboot" }; // TODO implement this 
+const char *roficmd[] = { "rofi", "-show", "drun", "-theme", "nihwm-theme", NULL };
 
-static const char *termcmd[]  = { USEDTERMINAL, NULL };
-static const char *printscr[] = { "flameshot", "gui", NULL };
+const char *termcmd[]  = { USEDTERMINAL, NULL };
+const char *printscr[] = { "flameshot", "gui", NULL };
 
 /* For no apparent reason, fn + button does not work */
-static const char *decvolcmd[] = { "amixer", "-D", "pulse", "sset", "Master", "1%-", NULL };
-static const char *incvolcmd[] = { "amixer", "-D", "pulse", "sset", "Master", "1%+", NULL };
+const char *decvolcmd[] = { "amixer", "-D", "pulse", "sset", "Master", "1%-", NULL };
+const char *incvolcmd[] = { "amixer", "-D", "pulse", "sset", "Master", "1%+", NULL };
 
-static const char *gromitmpxcmd[] = { "gromit-mpx", NULL };
-static const char *pavucontrolcmd[] = { "pavucontrol", NULL };
-static const char *mousepadcmd[] = { "mousepad", NULL };
+const char *gromitmpxcmd[] = { "gromit-mpx", NULL };
+const char *pavucontrolcmd[] = { "pavucontrol", NULL };
+const char *mousepadcmd[] = { "mousepad", NULL };
 
 /* Define the startup command (application/optional) */
-static const char *browsercmd[] = { "chromium", NULL };
-static const char *rhythmboxcmd[] = { "rhythmbox", NULL };
-static const char *thunarcmd[] = { "thunar", NULL };
-static const char *lmms130cmd[] = { "lmms1.3.0", NULL };
+const char *browsercmd[] = { "chromium", NULL };
+const char *rhythmboxcmd[] = { "rhythmbox", NULL };
+const char *thunarcmd[] = { "thunar", NULL };
+const char *lmms130cmd[] = { "lmms1.3.0", NULL };
 
 /* not in nihwm, my own config KEYBOARDS */
-static const char *xkbqwerty[] = { "setxkbmap", "us", NULL };
-static const char *xkbdvorak[] = { "setxkbmap", "us", "-variant", "dvorak", NULL };
-static const char *xkbcolemak[] = { "setxkbmap", "us", "-variant", "colemak", NULL };
-static const char *xkbarabic[] = { "setxkbmap", "ara", NULL };
-static const char *xkbjapanese[] = { "setxkbmap", "jp", NULL };
+const char *xkbqwerty[] = { "setxkbmap", "us", NULL };
+const char *xkbdvorak[] = { "setxkbmap", "us", "-variant", "dvorak", NULL };
+const char *xkbcolemak[] = { "setxkbmap", "us", "-variant", "colemak", NULL };
+const char *xkbarabic[] = { "setxkbmap", "ara", NULL };
+const char *xkbjapanese[] = { "setxkbmap", "jp", NULL };
 
 /* startup */
-static const char **startup[] = {
+const char **startup[] = {
 	/* command  */
 	pavucontrolcmd,
 	gromitmpxcmd,
@@ -136,7 +136,7 @@ static const char **startup[] = {
 };
 
 /* this is where the rules are defined */
-static const Rule rules[] = {
+const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
@@ -188,7 +188,7 @@ static const Rule rules[] = {
 
 /* this is where the keys are defined */
 /* TODO implement a system where it is possible to use arrow keys, undescore, .etc */
-static Key keys[] = {
+Key keys[] = {
 	/* event type    modifier            key        function        argument            disable */
 	{ KeyPress,      MODKEY,             XK_F10,    spawn,          {.v = decvolcmd} },
 	{ KeyPress,      MODKEY,             XK_F11,    spawn,          {.v = incvolcmd} },
@@ -263,14 +263,14 @@ static Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_F4,     spawn,          {.v = xkbarabic} }, 	
 	{ KeyPress,      MODKEY,             XK_F5,     spawn,          {.v = xkbjapanese} },
 
-	{ KeyPress,      MODKEY,             XK_w,      toggleoverlay,  {0} }, // TODO should the overlay be pressed or held?
+	{ KeyPress,      MODKEY,             XK_w,      toggleoverlay,  {-1} }, // TODO should the overlay be pressed or held?
 	{ KeyPress,      MODKEY|ShiftMask,   XK_w,      makeoverlay,    {0} }, 
 #endif
 };
 
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
-static Button buttons[] = {
+Button buttons[] = {
 	/* click                event mask      button          function        argument           disable */
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} }, // TODO disable this
@@ -292,3 +292,5 @@ static Button buttons[] = {
 	/*{ ClkTagBar,            MODKEY,         Button4,        toggletag,      {0} },
 	{ ClkTagBar,            MODKEY,         Button5,        toggletag,      {0} }, Implement scrolling */ 
 };
+
+#endif /* CONFIG_H */

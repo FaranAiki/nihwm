@@ -1,6 +1,12 @@
 /* This is where all the layouts are located */
 
+#include "nihwm.h"
+
 // TODO add more mode
+
+/* external variables */
+extern int gappx;
+extern int showoverlay;
 
 void
 tile(Monitor *m)
@@ -167,12 +173,12 @@ fibonacci(Monitor *mon, int s) {
 	}
 }
 
-void
+inline void
 dwindle(Monitor *mon) {
 	fibonacci(mon, 1);
 }
 
-void
+inline void
 spiral(Monitor *mon) {
 	fibonacci(mon, 0);
 }

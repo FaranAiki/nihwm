@@ -9,267 +9,30 @@
  *
  * TODO combine this with picom (idc what fork)
  *
- * Some patches are manually coded! -_- ( like 10-more-ewmhs.diff )
  */
 
-/* macro definitions for include headers  */
-#define XK_TECHNICAL
+/* include the main file */
+#include "nihwm.h"
+#include "rulemodes.h"
 
-#include <errno.h>
-#include <locale.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <X11/cursorfont.h>
-#include <X11/keysym.h>
-#include <X11/Xatom.h>
-#include <X11/Xlib.h>
-#include <X11/Xproto.h>
-#include <X11/Xutil.h>
-#ifdef XINERAMA
-#include <X11/extensions/Xinerama.h>
-#endif /* XINERAMA */
-#include <X11/Xft/Xft.h>
+/* configuration, allows nested code to access above variables */
+#include "config.h"
 
-#include "drw.h"
-#include "util.h"
-
-/* macros */
-#define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
-#define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
-#define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
-                               * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
-#define ISVISIBLEA(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
-#define ISVISIBLE(C)           (((C->tags & C->mon->tagset[C->mon->seltags]) && !(C->isoverlay && !showoverlay)) || (c->isoverlay && showoverlay))
-#define LENGTH(X)               (sizeof X / sizeof X[0])
-#define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
-#define WIDTH(X)                ((X)->w + 2 * (X)->bw + gappx)
-#define HEIGHT(X)               ((X)->h + 2 * (X)->bw + gappx)
-#define TAGMASK                 ((1 << LENGTH(tags)) - 1)
-#define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
-
-#define SSWITCH(V)              if (arg->i == -1) V = !V; else V = arg->i & 1
-
-/* enums */
-enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel }; /* color schemes */
-enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
-       NetWMFullscreen, NetActiveWindow, NetWMWindowType,
-	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
-	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetWMMoveResize, NetMoveResizeWindow, NetLast }; /* EWMH atoms */
-enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating, CusShowOverlay, CusIgnoreMasterFocus, CusLast }; /* custom atoms */
-enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
-       ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
-
-typedef union {
-	int i;
-	unsigned int ui;
-	float f;
-	const void *v;
-} Arg;
-
-typedef struct {
-	unsigned int click;
-	unsigned int mask;
-	unsigned int button;
-	void (*func)(const Arg *arg);
-	const Arg arg;
-	const int disable;
-} Button;
-
-typedef struct Monitor Monitor;
-typedef struct Client Client;
-struct Client {
-	char name[256];
-	float mina, maxa;
-	int x, y, w, h;
-	int oldx, oldy, oldw, oldh;
-	int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
-	int bw, oldbw;
-	unsigned int tags;
-	int isfixed, iscentered, isfloating, isoverlay, isalwaysontop, isurgent, neverfocus, oldstate, isfullscreen;
-	Client *next;
-	Client *snext;
-	Monitor *mon;
-	Window win;
-};
-
-typedef struct {
-	int type;
-	unsigned int mod;
-	KeySym keysym;
-	void (*func)(const Arg *);
-	const Arg arg;
-	const int disable;
-} Key;
-
-typedef struct {
-	const char *symbol;
-	void (*arrange)(Monitor *);
-} Layout;
-
-// TODO selmon as array: 1-10 where 10 is when combined
-struct Monitor {
-	char ltsymbol[16];
-	float mfact;
-	int nmaster;
-	int num;
-	int by;               /* bar geometry */
-	int mx, my, mw, mh;   /* screen size */
-	int wx, wy, ww, wh;   /* window area  */
-	unsigned int seltags;
-	unsigned int sellt;
-	unsigned int tagset[2];
-	int showbar;
-	int topbar;
-	Client *clients;
-	Client *sel;
-	Client *stack;
-	Monitor *next;
-	Window barwin;
-	const Layout *lt[2];
-};
-
-typedef struct {
-	const char *class;
-	const char *instance;
-	const char *title;
-	unsigned int tags;
-	int isfloating;
-	int monitor;
-	int isoverlay;
-} Rule;
-
-/* function declarations */
-static void applyrules(Client *c);
-static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
-static void arrange(Monitor *m);
-static void arrangemon(Monitor *m);
-static void attach(Client *c);
-static void attachbelow(Client *c);
-static void attachstack(Client *c);
-static void buttonpress(XEvent *e);
-static void checkotherwm(void);
-static void cleanup(void);
-static void cleanupmon(Monitor *mon);
-static void clientmessage(XEvent *e);
-static void configure(Client *c);
-static void configurenotify(XEvent *e);
-static void configurerequest(XEvent *e);
-static Monitor *createmon(void);
-static void destroynotify(XEvent *e);
-static void detach(Client *c);
-static void detachstack(Client *c);
-static Monitor *dirtomon(int dir);
-static void drawbar(Monitor *m);
-static void drawbars(void);
-static void enternotify(XEvent *e);
-static void expose(XEvent *e);
-static void focus(Client *c);
-static void focusin(XEvent *e);
-static void focusmon(const Arg *arg);
-static void focusstack(const Arg *arg);
-static Atom getatomprop(Client *c, Atom prop);
-static int getrootptr(int *x, int *y);
-static long getstate(Window w);
-static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
-static void grabbuttons(Client *c, int focused);
-static void grabkeys(void);
-static void incnmaster(const Arg *arg);
-static void incngappx(const Arg *arg);
-static void keypress(XEvent *e);
-static void killclient(const Arg *arg, const int forced);
-static void killclientsel(const Arg *arg);
-static void manage(Window w, XWindowAttributes *wa);
-static void makeoverlay(const Arg *arg);
-static void mappingnotify(XEvent *e);
-static void maprequest(XEvent *e);
-static void motionnotify(XEvent *e);
-static void movemouse(const Arg *arg);
-static Client *nexttiled(Client *c);
-static void pop(Client *);
-static void propertynotify(XEvent *e);
-static void quit(const Arg *arg);
-static Monitor *recttomon(int x, int y, int w, int h);
-static void resize(Client *c, int x, int y, int w, int h, int interact);
-static void resizeclient(Client *c, int x, int y, int w, int h);
-static void resizemouse(const Arg *arg);
-static void restack(Monitor *m);
-static void run(void);
-static void scan(void);
-static int sendevent(Client *c, Atom proto);
-static void sendmon(Client *c, Monitor *m);
-static void setclientstate(Client *c, long state);
-static void setfocus(Client *c);
-static void setfullscreen(Client *c, int fullscreen);
-static void setlayout(const Arg *arg);
-static void setmfact(const Arg *arg);
-static void setnumbdesktops(void);
-static void setup(void);
-static void seturgent(Client *c, int urg);
-static void showhide(Client *c);
-static void sigchld(int unused);
-static void sighup(int unused);
-static void sigterm(int unused);
-static void spawn(const Arg *arg);
-static void startapp(void);
-static void tag(const Arg *arg);
-static void tagmon(const Arg *arg);
-static void toggleattachbelow(const Arg *arg);
-static void toggleallownextfloating(const Arg *arg);
-static void togglebar(const Arg *arg);
-static void togglecolorsel(const Arg *arg);
-static void toggleoverlay(const Arg *arg);
-static void toggleignoremasterfocus(const Arg *arg); // TODO port this to another file
-static void toggletopbar(const Arg *arg);
-static void togglefloating(const Arg *arg);
-static void togglealwaysontop(const Arg *arg);
-static void toggletag(const Arg *arg);
-static void toggleswitchonfocus(const Arg *arg);
-static void togglecompositor(const Arg *arg);
-static void toggleview(const Arg *arg);
-static void unfocus(Client *c, int setfocus);
-static void unmanage(Client *c, int destroyed);
-static void unmapnotify(XEvent *e);
-static void updateclientdesktop(Client *c);
-static void updatecurrentdesktop(void);
-static void updatebarpos(Monitor *m);
-static void updatebars(void);
-static void updateclientlist(void);
-static int updategeom(void);
-static void updatenumlockmask(void);
-static void updatesizehints(Client *c);
-static void updatestatus(void);
-static void updatetitle(Client *c);
-static void updatewindowtype(Client *c);
-static void updatewmhints(Client *c);
-static void view(const Arg *arg);
-static Client *wintoclient(Window w);
-static Monitor *wintomon(Window w);
-static int xerror(Display *dpy, XErrorEvent *ee);
-static int xerrordummy(Display *dpy, XErrorEvent *ee);
-static int xerrorstart(Display *dpy, XErrorEvent *ee);
-static void zoom(const Arg *arg);
+/* compile-time check if all tags fit into an unsigned int bit array. */
+struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
 
 /* variables */
-static Client *lastfocused = NULL;
-static Client *prevzoom = NULL;
-static const char broken[] = "broken"; /* wtf is this? */
-static char stext[256];
-static int showoverlay = 0;
-static int screen;
-static int sw, sh;           /* X display screen geometry width, height */
-static int bh, blw = 0;      /* bar geometry */
-static int lrpad;            /* sum of left and right padding for text */
-static int (*xerrorxlib)(Display *, XErrorEvent *);
-static unsigned int numlockmask = 0;
-static void (*handler[LASTEvent]) (XEvent *) = {
+Client *lastfocused = NULL;
+Client *prevzoom = NULL;
+const char broken[] = "broken"; /* wtf is this? */
+char stext[256];
+int screen;
+int sw, sh;           /* X display screen geometry width, height */
+int bh, blw = 0;      /* bar geometry */
+int lrpad;            /* sum of left and right padding for text */
+int (*xerrorxlib)(Display *, XErrorEvent *);
+unsigned int numlockmask = 0;
+void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
 	[ClientMessage] = clientmessage,
 	[ConfigureRequest] = configurerequest,
@@ -286,43 +49,15 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[PropertyNotify] = propertynotify,
 	[UnmapNotify] = unmapnotify
 };
-static Atom wmatom[WMLast], netatom[NetLast], cusatom[CusLast];
-static int restart = 0;
-static int running = 1;
-static Cur *cursor[CurLast];
-static Clr **scheme;
-static Display *dpy;
-static Drw *drw;
-static Monitor *mons, *selmon;
-static Window root, wmcheckwin;
-
-/* array */
-static const long stf[2][1] = {
-	{0},
-	{1},
-}; 
-
-/* constants */
-static const char *nihwmctl_kill_[]  = {"killall", "nihwmctl", NULL};
-static const char *nihwmctl_start_[] = {"nihwmctl", "statusbar", NULL};
-static const char *nihwmctl_compo_kill_[] = {"killall", "picom", NULL};
-static const char *nihwmctl_compo_start_[] = {"picom", "-b", NULL};
-
-static char * const nihwm_reslist[]  = {"nihwm", "-no-startapp", NULL};
-
-// TODO optimize this
-
-/* arg */
-static const Arg nihwmctl_start = { .v = nihwmctl_start_ };
-static const Arg nihwmctl_kill = { .v = nihwmctl_kill_ };
-static const Arg nihwmctl_compo_start = { .v = nihwmctl_compo_start_ };
-static const Arg nihwmctl_compo_kill = { .v = nihwmctl_compo_kill_ };
-
-/* configuration, allows nested code to access above variables */
-#include "config.h"
-
-/* compile-time check if all tags fit into an unsigned int bit array. */
-struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
+Atom wmatom[WMLast], netatom[NetLast], cusatom[CusLast];
+int restart = 0;
+int running = 1;
+Cur *cursor[CurLast];
+Clr **scheme;
+Display *dpy;
+Drw *drw;
+Monitor *mons, *selmon;
+Window root, wmcheckwin;
 
 /* function implementations */
 void
@@ -954,50 +689,44 @@ focusmon(const Arg *arg)
 	focus(NULL);
 }
 
-// TODO fix this problem CORRECTLY
-// TODO implement ignore master focus
+// TODO explain side effect when there is only a floating window, it will switch "normally"
 void
 focusstack(const Arg *arg)
 {
-	Client *c = NULL, *i = NULL, *cur = NULL;
-	int nofloating = 1, timeout = 0;
-
-	// kind of crappy but okay, TODO make this faster
+	Client *c = NULL, *i;
+	int nofloating = 0;
 
 	if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen))
 		return;
 
-	cur = selmon->sel;
-	
-	if (!allownextfloating)
-	for (c = selmon->sel->next; c != cur && timeout < 100; c = c->next, timeout++) {
-		if (!c) c = selmon->clients;
-		if (ISVISIBLE(c) && c->isfloating) { nofloating = 0; break; }
-	}
+	// check if there is not a floating window
+	for (c = selmon->clients; c; c = c->next)
+		if (ISVISIBLE(c) && !c->isfloating) { nofloating = 1; break; }
 
-	if (timeout == 100) return;
+	if (!nofloating && !allownextfloating) return;
+
+	c = NULL; // safety measure
 
 	if (arg->i > 0) {
-		for (c = cur->next; c && !ISVISIBLE(c); c = c->next);
-		if (!c) // if it reaches the end
+		for (c = selmon->sel->next; c && !ISVISIBLE(c); c = c->next);
+		if (!c)
 			for (c = selmon->clients; c && !ISVISIBLE(c); c = c->next);
 	} else {
-		for (i = selmon->clients; i != cur; i = i->next)
-			if (ISVISIBLE(i))
+		for (i = selmon->clients; i != selmon->sel; i = i->next)
+			if (ISVISIBLE(i) && !(nofloating && i->isfloating && !allownextfloating))
 				c = i;
-		if (!c) // if selmon->sel = selmon->clients
+		if (!c)
 			for (; i; i = i->next)
-				if (ISVISIBLE(i))
+				if (ISVISIBLE(i) && !(nofloating && i->isfloating && !allownextfloating))
 					c = i;
 	}
 
-	if (c) {	
+	if (c) {
 		focus(c);
 		restack(selmon);
 	}
 
-	// fix if there is no next floating or overlay
-	if (!nofloating && c->isfloating && !allownextfloating) focusstack(arg);
+	if (nofloating && c->isfloating && !allownextfloating) focusstack(arg);
 }
 
 Atom
@@ -1119,7 +848,7 @@ incnmaster(const Arg *arg)
 void
 incngappx(const Arg *arg)
 {
-	gappx = MAX(gappx + arg->i, 0);
+	gappx = MAX(gappx + arg->i, 2); // TODO fix this so that we can set this to 0
 	arrange(selmon);
 }
 
@@ -1265,7 +994,7 @@ makeoverlay(const Arg *arg)
 
 	if (!arg->v && selmon->sel)
 		c = selmon->sel; 
-	else if (!selmon->sel)
+	else if (!selmon->sel && arg->v)
 		c = (Client *) arg->v;
 	else
 		return;
@@ -1813,12 +1542,7 @@ setup(void)
 
 
 	/* init customizable atoms */
-	cusatom[CusNetFocusChange] = XInternAtom(dpy, "_NIHWM_FOCUS_CHANGE", False);
-	cusatom[CusUsingCompositor] = XInternAtom(dpy, "_NIHWM_USING_COMPOSITOR", False);
-	cusatom[CusAttachBelow] = XInternAtom(dpy, "_NIHWM_ATTACH_BELOW", False);
-	cusatom[CusAllowNextFloating] = XInternAtom(dpy, "_NIHWM_ALLOW_NEXT_FLOATING", False);
-	cusatom[CusShowOverlay] = XInternAtom(dpy, "_NIHWM_SHOW_OVERLAY", False);
-	cusatom[CusIgnoreMasterFocus] = XInternAtom(dpy, "_NIHWM_IGNORE_MASTER_FOCUS", False);
+	initcusatom();
 
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
@@ -1843,24 +1567,13 @@ setup(void)
 	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 
-	/* custom atom initialization */
-	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[switchonfocus], 1 );
-	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[iscompositoractive], 1 );
-	XChangeProperty(dpy, root, cusatom[CusAttachBelow], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[isattachbelow], 1 );
-	XChangeProperty(dpy, root, cusatom[CusAllowNextFloating], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[allownextfloating], 1 );	
-	XChangeProperty(dpy, root, cusatom[CusShowOverlay], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[showoverlay], 1 );	
-	XChangeProperty(dpy, root, cusatom[CusIgnoreMasterFocus], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) stf[ignoremasterfocus], 1);
-
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) netatom, NetLast);
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
+
+	/* custom atom setup */
+	setupcusatom();	
 
 	/* set EWMH NUMBER_OF_DESKTOPS */
 	setnumbdesktops();
@@ -1976,73 +1689,14 @@ tagmon(const Arg *arg)
 	sendmon(selmon->sel, dirtomon(arg->i));
 }
 
-
 void
-toggleallownextfloating(const Arg *arg)
+togglebar(const Arg *arg)
 {
-	SSWITCH(allownextfloating);
+	SSWITCH(selmon->showbar);
 
-	XChangeProperty(dpy, root, cusatom[CusAllowNextFloating], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[allownextfloating], 1 );	
-}
-
-void
-toggleattachbelow(const Arg *arg)
-{
-	SSWITCH(isattachbelow);
-
-	XChangeProperty(dpy, root, cusatom[CusAttachBelow], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) stf[isattachbelow], 1 );	
-}
-
-void
-toggleswitchonfocus(const Arg *arg)
-{
-	SSWITCH(switchonfocus);
-
-	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) stf[switchonfocus], 1);
-}
-
-void
-togglecompositor(const Arg *arg)
-{
-	SSWITCH(iscompositoractive);
-
-	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) stf[iscompositoractive], 1);
-
-	if (iscompositoractive) {
-		spawn(&nihwmctl_compo_start);
-	} else {
-		spawn(&nihwmctl_compo_kill);
-	}
-}
-
-void
-toggleoverlay(const Arg *arg)
-{
-	SSWITCH(showoverlay);	
-	
-	XChangeProperty(dpy, root, cusatom[CusShowOverlay], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) stf[showoverlay], 1);
-
-	if (showoverlay == 0 && selmon->sel && selmon->sel->isoverlay) {
-		unfocus(selmon->sel, 1);
-		focus(NULL);
-	}
-
+	updatebarpos(selmon);
+	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
 	arrange(selmon);
-}
-
-
-void
-toggleignoremasterfocus(const Arg *arg)
-{
-	SSWITCH(ignoremasterfocus);
-
-	XChangeProperty(dpy, root, cusatom[CusIgnoreMasterFocus], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) stf[ignoremasterfocus], 1);	
 }
 
 void
@@ -2053,17 +1707,17 @@ togglecolorsel(const Arg *arg)
 	col_sel = (col_sel + 1) % LENGTH(used_color);
 	colors[SchemeSel][2] = used_color[col_sel]; // switch through color selection border
 
+	/* copy from cleanup */
+	for (i = 0; i < LENGTH(colors); i++)
+		free(scheme[i]);
+	free(scheme);
+
+	/* init appearance */
+	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
+	for (i = 0; i < LENGTH(colors); i++)
+		scheme[i] = drw_scm_create(drw, colors[i], 3);
+
 	if (selmon->sel) focus(selmon->sel);	
-}
-
-void
-togglebar(const Arg *arg)
-{
-	SSWITCH(selmon->showbar);
-
-	updatebarpos(selmon);
-	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
-	arrange(selmon);
 }
 
 void

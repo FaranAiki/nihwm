@@ -6,9 +6,11 @@ flameshot
 notify-send
 thunar
 rhythmbox
+rofi
 obs
 kitty
 krita
+lmms
 lmms1.3.0
 zathura
 inkscape
