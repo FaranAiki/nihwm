@@ -14,6 +14,7 @@ void grid(Monitor *m);
 void monocle(Monitor *m);
 void spiral(Monitor *m);
 void tile(Monitor *m);
+void tcl(Monitor *m);
 
 extern const Layout layouts[];
 
