@@ -1,6 +1,6 @@
 /* See LICENSE file for copyright and license details.
  *
- * nihwm?, fork of dwm by Muhammad Faran Aiki written in C
+ * nihwm?, fork of dwm by Muhammad Faran Aiki written in C and shell scripts
  * Of course this is not just taking the credit of the dwm, but I modify some of the functionality
  *
  * Source code read while modifying this program:
@@ -684,24 +684,31 @@ focusmon(const Arg *arg)
 		return;
 	if ((m = dirtomon(arg->i)) == selmon)
 		return;
+
 	unfocus(selmon->sel, 0);
 	selmon = m;
 	focus(NULL);
 }
 
 // TODO explain side effect when there is only a floating window, it will switch "normally"
+// TODO implement ignore master
 void
 focusstack(const Arg *arg)
 {
-	Client *c = NULL, *i;
-	int nofloating = 0;
+	Client *c = NULL, *i, *nonmaster = selmon->clients;
+	int nofloating = 0, n = 0;
 
 	if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen))
 		return;
 
-	// check if there is not a floating window
-	for (c = selmon->clients; c; c = c->next)
-		if (ISVISIBLE(c) && !c->isfloating) { nofloating = 1; break; }
+	// check if there is not a floating window & ignore master focus
+	for (c = selmon->clients; c; c = c->next) {
+		if (ISVISIBLE(c)) { 
+	//		if (n == selmon->nmaster) { nonmaster = c; }
+			if (!c->isfloating) { nofloating = 1; break; }	
+   //		n++;
+		}
+	}
 
 	if (!nofloating && !allownextfloating) return;
 
@@ -710,9 +717,9 @@ focusstack(const Arg *arg)
 	if (arg->i > 0) {
 		for (c = selmon->sel->next; c && !ISVISIBLE(c); c = c->next);
 		if (!c)
-			for (c = selmon->clients; c && !ISVISIBLE(c); c = c->next);
+			for (c = nonmaster; c && !ISVISIBLE(c); c = c->next, n++);
 	} else {
-		for (i = selmon->clients; i != selmon->sel; i = i->next)
+		for (i = nonmaster; i != selmon->sel; i = i->next, n++)
 			if (ISVISIBLE(i) && !(nofloating && i->isfloating && !allownextfloating))
 				c = i;
 		if (!c)
@@ -727,6 +734,9 @@ focusstack(const Arg *arg)
 	}
 
 	if (nofloating && c->isfloating && !allownextfloating) focusstack(arg);
+
+	printf("\n");
+	fflush(stdout);
 }
 
 Atom
