@@ -10,8 +10,8 @@ enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetWMMoveResize, NetMoveResizeWindow, NetLast }; /* EWMH atoms */
+/* enum { ..., CusLast, } */ 
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating, CusShowOverlay, CusIgnoreMasterFocus, CusLast }; /* custom atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 

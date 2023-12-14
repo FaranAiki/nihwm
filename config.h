@@ -93,17 +93,24 @@ const Arg startup_tag = { .ui = 1 << 8 }; /* where do you want the startup to be
 
 /* commands */
 char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
+const char *dmenucmd[]    = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 const char *shutdowncmd[] = { "nihwmctl", "shutdown" }; 
-const char *rebootcmd[] = { "nihwmctl", "reboot" }; // TODO implement this 
-const char *roficmd[] = { "rofi", "-show", "drun", "-theme", "nihwm-theme", NULL };
+const char *rebootcmd[]   = { "nihwmctl", "reboot" }; // TODO implement this 
+const char *roficmd[]     = { "rofi", "-show", "drun", "-theme", "nihwm-theme", NULL };
 
-const char *termcmd[]  = { USEDTERMINAL, NULL };
-const char *printscr[] = { "flameshot", "gui", NULL };
+const char *termcmd[]     = { USEDTERMINAL, NULL };
+const char *printscr[]    = { "flameshot", "gui", NULL };
 
-/* For no apparent reason, fn + button does not work */
-const char *decvolcmd[] = { "amixer", "-D", "pulse", "sset", "Master", "1%-", NULL };
-const char *incvolcmd[] = { "amixer", "-D", "pulse", "sset", "Master", "1%+", NULL };
+/* Brightness, volume, et cetera */
+const char *decvolcmd[]    = { "amixer", "-D", "pulse", "sset", "Master", "1%-", NULL }; // TODO what if we don't use pulse?
+const char *incvolcmd[]    = { "amixer", "-D", "pulse", "sset", "Master", "1%+", NULL };
+const char *decbrightcmd[] = { "brightnessctl", "set", "5%-", NULL };
+const char *incbrightcmd[] = { "brightnessctl", "set", "5%+", NULL };
+const char *mutevolcmd[]   = { "amixer", "-D", "pulse", "set", "Master", "1+", "toggle", NULL};
+const char *plynextcmd[]   = { "playerctl", "next", NULL }; 
+const char *plyprevcmd[]   = { "playerctl", "previous", NULL }; 
+const char *plystopcmd[]   = { "playerctl", "stop", NULL };
+const char *plytoggcmd[]   = { "playerctl", "play-pause", NULL }; 
 
 const char *gromitmpxcmd[] = { "gromit-mpx", NULL };
 const char *pavucontrolcmd[] = { "pavucontrol", NULL };
@@ -189,10 +196,9 @@ const Rule rules[] = {
 
 /* this is where the keys are defined */
 /* TODO implement a system where it is possible to use arrow keys, undescore, .etc */
+/* */
 Key keys[] = {
 	/* event type    modifier            key        function        argument            disable */
-	{ KeyPress,      MODKEY,             XK_F10,    spawn,          {.v = decvolcmd} },
-	{ KeyPress,      MODKEY,             XK_F11,    spawn,          {.v = incvolcmd} },
 	{ KeyPress,      0,                  K_printscreen, spawn,      {.v = printscr} },	
 	{ KeyPress,      MODKEY,             XK_p,      spawn,          {.v = dmenucmd } },
 	{ KeyPress,      MODKEY,             XK_r,      spawn,          {.v = roficmd } }, // Makes it possible to run Windows-downloaded or .desktop file(s): Saya no Uta, FL Studio, xppentablet, ....
@@ -252,6 +258,7 @@ Key keys[] = {
 	{ KeyPress,      MODKEY|ControlMask|ShiftMask, XK_r,      spawn,          {.v = rebootcmd} }, // Graceful shutdown
 
 	{ KeyPress,      MODKEY,             XK_c,      togglecolorsel,          {0} }, // color selection
+	{ KeyPress,      MODKEY|ControlMask, XK_w,      togglecursorwarp,        {-1} }, // cursor warp
 	{ KeyPress,      MODKEY|ControlMask, XK_f,      toggleallownextfloating, {-1} }, // disallow/allow mod+j or mod+k or similar to be focused
 	{ KeyPress,      MODKEY|ShiftMask,   XK_c,      togglecompositor,        {-1} }, // use/don't use compositor
 	{ KeyPress,      MODKEY|ShiftMask,   XK_f,      toggleswitchonfocus,     {-1} }, // ignore popup focus
@@ -265,9 +272,20 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_F4,     spawn,          {.v = xkbarabic} }, 	
 	{ KeyPress,      MODKEY,             XK_F5,     spawn,          {.v = xkbjapanese} },
 
-	{ KeyPress,      MODKEY,             XK_w,      toggleoverlay,  {-1} }, // TODO should the overlay be pressed or held?
+	{ KeyPress,      MODKEY,             XK_w,      toggleoverlay,  {-1} }, // REMINDER should the overlay be pressed or held?
 	{ KeyPress,      MODKEY|ShiftMask,   XK_w,      makeoverlay,    {0} }, 
 #endif
+
+	{ KeyPress,      0,                  XF86XK_MonBrightnessUp,   spawn,   {.v = incbrightcmd} },
+	{ KeyPress,      0,                  XF86XK_MonBrightnessDown, spawn,   {.v = decbrightcmd} },
+	{ KeyPress,      0,                  XF86XK_AudioRaiseVolume,  spawn,   {.v = incvolcmd} },
+	{ KeyPress,      0,                  XF86XK_AudioLowerVolume,  spawn,   {.v = decvolcmd} },
+	{ KeyPress,      0,                  XF86XK_AudioMute,         spawn,   {.v = mutevolcmd} },
+	{ KeyPress,      0,                  XF86XK_AudioPlay,         spawn,   {.v = plytoggcmd} },
+	{ KeyPress,      0,                  XF86XK_AudioPause,        spawn,   {.v = plytoggcmd} },
+	{ KeyPress,      0,                  XF86XK_AudioNext,         spawn,   {.v = plynextcmd} },
+	{ KeyPress,      0,                  XF86XK_AudioPrev,         spawn,   {.v = plyprevcmd} },
+
 };
 
 /* button definitions */
@@ -276,10 +294,15 @@ Button buttons[] = {
 	/* click                event mask      button          function        argument           disable */
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} }, // TODO disable this
+	
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkWinTitle,          0,              Button4,        focusstack,     {.i = +1 } }, // Scroll up
 	{ ClkWinTitle,          0,              Button5,        focusstack,     {.i = -1 } }, // Scroll down
+	
 	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
+	{ ClkStatusText,        0,              Button4,        spawn,          {.v = incvolcmd } },
+	{ ClkStatusText,        0,              Button5,        spawn,          {.v = decvolcmd } },
+
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
@@ -287,10 +310,14 @@ Button buttons[] = {
 	{ ClkClientWin,         MODKEY,         Button5,        focusstack,     {.i = -1 } }, // Scroll down
 	{ ClkClientWin,         MODKEY|ShiftMask, Button1,      focusstack,     {.i = +1 } },
 	{ ClkClientWin,         MODKEY|ShiftMask, Button3,      focusstack,     {.i = -1 } },
+	
+	// { ClkRootWin,           0,              Button3,        0,              0 },	
+
 	{ ClkTagBar,            0,              Button1,        view,           {0} },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
+	
 	/*{ ClkTagBar,            MODKEY,         Button4,        toggletag,      {0} },
 	{ ClkTagBar,            MODKEY,         Button5,        toggletag,      {0} }, Implement scrolling */ 
 };

@@ -12,12 +12,13 @@ extern Monitor *mons, *selmon;
 extern int colsel;
 
 /* this is where all the rulemodes are defined */
-int isattachbelow         = 1;    /* 1 means attach at the end [nonmaster, decreasing] */
 int allownextfloating     = 0;    /* 1 means focusstack allows next window to be floating */
-int switchonfocus         = 0;    /* 1 means change to the current window which requests a focus */
-int iscompositoractive    = 1;    /* 1 means compositor (picom, picom-fork, nihcomp) is active */
 int ignoremasterfocus     = 0;    /* 1 means ignore master in focusstack function, useful for deck */
-int showoverlay           = 0;
+int isattachbelow         = 1;    /* 1 means attach at the end [nonmaster, decreasing] */
+int iscompositoractive    = 1;    /* 1 means compositor (picom, picom-fork, nihcomp) is active */
+int iscursorwarp          = 0;    /* 1 means cursor warp i.e. if focusstack, the mouse will warp/move to the current focused client */
+int showoverlay           = 0;    /* 1 means show the overlay (Mod-Shift-W windows: at start, Rhythmbox and Mousepad) */
+int switchonfocus         = 0;    /* 1 means change to the current window which requests a focus */
 
 /* array */
 const long stf[2][1] = {
@@ -49,12 +50,17 @@ initcusatom()
 	cusatom[CusAttachBelow] = XInternAtom(dpy, "_NIHWM_ATTACH_BELOW", False);
 	cusatom[CusAllowNextFloating] = XInternAtom(dpy, "_NIHWM_ALLOW_NEXT_FLOATING", False);
 	cusatom[CusShowOverlay] = XInternAtom(dpy, "_NIHWM_SHOW_OVERLAY", False);
-	cusatom[CusIgnoreMasterFocus] = XInternAtom(dpy, "_NIHWM_IGNORE_MASTER_FOCUS", False);
+	cusatom[CusCursorWarp] = XInternAtom(dpy, "_NIHWM_CURSOR_WARP", False);
+	cusatom[CusIgnoreMasterFocus] = XInternAtom(dpy, "_NIHWM_IGNORE_MASTER_FOCUS", False); // TODO implement this
+
+	cusatom[CusNumOfMaster] = XInternAtom(dpy, "_NIHWM_NUMBER_OF_MASTER", False);
 }
 
 void
 setupcusatom()
 {
+	long numofmaster[] = { selmon->nmaster }; 
+
 	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[switchonfocus], 1 );
 	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
@@ -67,6 +73,9 @@ setupcusatom()
 		PropModeReplace, (unsigned char *) stf[showoverlay], 1 );	
 	XChangeProperty(dpy, root, cusatom[CusIgnoreMasterFocus], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) stf[ignoremasterfocus], 1);
+
+	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) numofmaster, 1);
 }
 
 void
@@ -135,5 +144,14 @@ toggleignoremasterfocus(const Arg *arg)
 
 	XChangeProperty(dpy, root, cusatom[CusIgnoreMasterFocus], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) stf[ignoremasterfocus], 1);	
+}
+
+void
+togglecursorwarp(const Arg *arg)
+{
+	SSWITCH(iscursorwarp);
+
+	XChangeProperty(dpy, root, cusatom[CusCursorWarp], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) stf[iscursorwarp], 1);	
 }
 

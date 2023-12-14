@@ -690,6 +690,14 @@ focusmon(const Arg *arg)
 	unfocus(selmon->sel, 0);
 	selmon = m;
 	focus(NULL);
+
+	long numofmaster[] = { selmon->nmaster };
+
+	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) numofmaster, 1);
+
+	if (selmon->sel && iscursorwarp)
+		XWarpPointer(dpy, None, selmon->sel->win, 0, 0, 0, 0, selmon->sel->w/2, selmon->sel->h/2);	
 }
 
 // TODO explain side effect when there is only a floating window, it will switch "normally"
@@ -733,6 +741,7 @@ focusstack(const Arg *arg)
 	if (c) {
 		focus(c);
 		restack(selmon);
+		if (iscursorwarp) XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
 	}
 
 	if (nofloating && c->isfloating && !allownextfloating) focusstack(arg);
@@ -855,6 +864,11 @@ incnmaster(const Arg *arg)
 {
 	selmon->nmaster = MAX(selmon->nmaster + arg->i, 0);
 	arrange(selmon);
+
+	long numofmaster[] = { selmon->nmaster };
+
+	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) numofmaster, 1);
 }
 
 void
@@ -995,6 +1009,9 @@ manage(Window w, XWindowAttributes *wa)
 	c->mon->sel = c;
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
+	// TODO is this important?
+	if (c && c->mon == selmon && iscursorwarp && switchonfocus)
+		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
 	focus(NULL);
 	updateclientdesktop(c);
 }
@@ -1244,10 +1261,14 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	XSync(dpy, False);
 }
 
+// TODO fix cursor whereabout when mod+ctrl
 void
 resizemouse(const Arg *arg)
 {
-	int ocx, ocy, nw, nh;
+	enum { TopLeft, TopRight, BottomLeft, BottomRight, End };
+
+	int ocx, ocy, nw, nh, tx, ty, res_type = BottomRight;
+
 	Client *c;
 	Monitor *m;
 	XEvent ev;
@@ -1263,7 +1284,26 @@ resizemouse(const Arg *arg)
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurResize]->cursor, CurrentTime) != GrabSuccess)
 		return;
-	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
+
+	if (!getrootptr(&tx, &ty)) return;
+
+	//**/
+	if (tx >= c->w/2 + c->x && ty >= c->h/2 + c->y) { // default
+		res_type = BottomRight; 
+		tx = c->w + c->bw - 1; ty = c->h + c->bw - 1;
+	} else if (tx < c->w/2 + c->x && ty >= c->h/2 + c->y) {
+		res_type = BottomLeft; 
+		tx = c->x + c->bw + 1 /* c->x + c->bw */; ty = c->h + c->bw - 1;
+	} else if (tx >= c->w/2 + c->x && ty < c->h/2 + c->y) {
+		res_type = TopRight; 
+		tx = c->w + c->bw - 1; ty = c->y + c->bw - 1;
+	} else if (tx < c->w/2 + c->x && ty < c->h/2 + c->y) {
+		res_type = TopLeft; 
+		tx = c->x + c->bw + 1; ty = c->y + c->bw - 1;
+	} /**/
+
+	// tx = c->w + c->bw -1; ty = c->h + c->bw - 1;
+	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, tx, ty);
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
 		switch(ev.type) {
@@ -1286,12 +1326,18 @@ resizemouse(const Arg *arg)
 				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
 					togglefloating(NULL);
 			}
-			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating)
-				resize(c, c->x, c->y, nw, nh, 1);
+			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
+				switch (res_type) {
+					case TopLeft: resize(c, nw, nh, c->w - nw + c->x, c->y - nh + c->h, 1); break;
+					case TopRight: resize(c, c->x, nh, nw, c->y - nh + c->h, 1); break;
+					case BottomLeft: resize(c, nw, c->y, c->w - nw + c->x, nh, 1); break;
+					case BottomRight: resize(c, c->x, c->y, nw, nh, 1); break;
+				}
+			}
 			break;
 		}
 	} while (ev.type != ButtonRelease);
-	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
+ 	// XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, tx, ty);
 	XUngrabPointer(dpy, CurrentTime);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
@@ -1846,6 +1892,9 @@ unmanage(Client *c, int destroyed)
 	focus(NULL);
 	updateclientlist();
 	arrange(m);
+	if (m == selmon && m->sel && iscursorwarp)
+		XWarpPointer(dpy, None, m->sel->win, 0, 0, 0, 0,
+		             m->sel->w/2, m->sel->h/2);
 }
 
 void

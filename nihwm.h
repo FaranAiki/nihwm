@@ -6,6 +6,7 @@
 #define NIHWM_H
 
 #define XK_TECHNICAL
+#define XK_PUBLISHING
 
 #include <errno.h>
 #include <locale.h>
@@ -19,6 +20,7 @@
 #include <sys/wait.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
+#include <X11/XF86keysym.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
@@ -45,8 +47,6 @@
 #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 
-#define SSWITCH(V)              if (arg->i == -1) V = !V; else V = arg->i & 1
-
 #include "datatypes.h"
 
 /* function declarations */
@@ -57,6 +57,7 @@ Monitor *createmon(void);
 Monitor *dirtomon(int dir);
 Monitor *recttomon(int x, int y, int w, int h);
 Monitor *wintomon(Window w);
+
 int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
 int getrootptr(int *x, int *y);
 int gettextprop(Window w, Atom atom, char *text, unsigned int size);
@@ -66,6 +67,7 @@ int xerror(Display *dpy, XErrorEvent *ee);
 int xerrordummy(Display *dpy, XErrorEvent *ee);
 int xerrorstart(Display *dpy, XErrorEvent *ee);
 long getstate(Window w);
+
 void applyrules(Client *c);
 void arrange(Monitor *m);
 void arrangemon(Monitor *m);

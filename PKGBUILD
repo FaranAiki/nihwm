@@ -6,7 +6,8 @@ pkgver=0.12
 pkgrel=1
 pkgdesc='nihwm window manager and nih desktop environment'
 
-provides=('nihwm', 'nih')
-conflicts=('nihwm', 'nih')
+provides=('nihwm')
+conflicts=('nihwm')
+depends=('alsa-utils' 'brightnessctl' 'playerctl'  'xorg-xinit')
 license=('MIT')
 arch=('x86_64' 'aarch64')

@@ -1,6 +1,6 @@
 #!/usr/bin/sh
 
-#define VERSION 0.1
+#define VERSION 0.11
 
 # The X Set Root
 # Display Style here
@@ -135,6 +135,14 @@ do
 		ignoremasterfocus=''
 	fi
 
+	# Ignore master focus in stack
+	iscursorwarp=$(xprop -root _NIHWM_CURSOR_WARP | cut -d"=" -f2)
+	if [ "$iscursorwarp" = ' 1' ]; then
+		iscursorwarp='^'
+	else
+		iscursorwarp=''
+	fi
+
 	# Battery checker
 	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
 		notify-send --urgency=critical -t 0 --icon=battery "Battery is low" "<span font='50px'>Please charge your Laptop's battery or use the cable while your laptop is still on.</span>"
@@ -142,7 +150,7 @@ do
 	fi
 
 	# All the rules, capslock, et cetera
-	condition="${nums}${caps}${showoverlay}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
+	condition="${nums}${caps}${showoverlay}${iscursorwarp}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
 	
 	# Set status bar
 	! xsetroot -name "[$condition] | $(date) | ${volume} | ${battery} | nihwm" && exit 69

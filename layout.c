@@ -1,8 +1,10 @@
+/* See LICENSE file for copyright and license details. */
+
 /* This is where all the layouts are located */
 
 #include "nihwm.h"
 
-// TODO add more mode
+// TODO add more mode... bloat? NO
 
 /* external variables */
 extern int gappx;
