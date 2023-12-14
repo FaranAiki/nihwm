@@ -702,6 +702,7 @@ focusmon(const Arg *arg)
 
 // TODO explain side effect when there is only a floating window, it will switch "normally"
 // TODO implement ignore master
+// TODO fix this, error arise when nihwm is reset
 void
 focusstack(const Arg *arg)
 {
@@ -727,9 +728,9 @@ focusstack(const Arg *arg)
 	if (arg->i > 0) {
 		for (c = selmon->sel->next; c && !ISVISIBLE(c); c = c->next);
 		if (!c)
-			for (c = nonmaster; c && !ISVISIBLE(c); c = c->next, n++);
+			for (c = nonmaster; c && !ISVISIBLE(c); c = c->next);
 	} else {
-		for (i = nonmaster; i != selmon->sel; i = i->next, n++)
+		for (i = nonmaster; i && i != selmon->sel; i = i->next)
 			if (ISVISIBLE(i) && !(nofloating && i->isfloating && !allownextfloating))
 				c = i;
 		if (!c)
@@ -1262,10 +1263,11 @@ resizeclient(Client *c, int x, int y, int w, int h)
 }
 
 // TODO fix cursor whereabout when mod+ctrl
+// TODO implement resizemouse(const Arg *arg, current)
 void
 resizemouse(const Arg *arg)
 {
-	enum { TopLeft, TopRight, BottomLeft, BottomRight, End };
+	enum { TopLeft, TopRight, BottomLeft, BottomRight, Center, End };
 
 	int ocx, ocy, nw, nh, tx, ty, res_type = BottomRight;
 
@@ -1288,7 +1290,9 @@ resizemouse(const Arg *arg)
 	if (!getrootptr(&tx, &ty)) return;
 
 	//**/
-	if (tx >= c->w/2 + c->x && ty >= c->h/2 + c->y) { // default
+	/* if (arg && arg->i) {
+		res_type = arg->i; TODO implement center resize	
+	} else*/ if (tx >= c->w/2 + c->x && ty >= c->h/2 + c->y) { // default
 		res_type = BottomRight; 
 		tx = c->w + c->bw - 1; ty = c->h + c->bw - 1;
 	} else if (tx < c->w/2 + c->x && ty >= c->h/2 + c->y) {
@@ -1302,8 +1306,11 @@ resizemouse(const Arg *arg)
 		tx = c->x + c->bw + 1; ty = c->y + c->bw - 1;
 	} /**/
 
-	// tx = c->w + c->bw -1; ty = c->h + c->bw - 1;
+	printf("warp to %d %d\nbut from %d %d\n", tx, ty, c->x, c->y);
+	fflush(stdout);
+
 	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, tx, ty);
+	// tx = c->w + c->bw -1; ty = c->h + c->bw - 1;
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
 		switch(ev.type) {
@@ -1316,7 +1323,6 @@ resizemouse(const Arg *arg)
 			if ((ev.xmotion.time - lasttime) <= (1000 / 60))
 				continue;
 			lasttime = ev.xmotion.time;
-
 			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
 			if (c->mon->wx + nw >= selmon->wx && c->mon->wx + nw <= selmon->wx + selmon->ww
