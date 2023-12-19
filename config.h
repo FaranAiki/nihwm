@@ -212,8 +212,8 @@ Key keys[] = {
 	
 	{ KeyPress,      MODKEY,             XK_j,      focusstack,     {.i = +1 } },
 	{ KeyPress,      MODKEY,             XK_k,      focusstack,     {.i = -1 } },
-	/*{ KeyPress,      MODKEY|ShiftMask,   XK_j,      movestack,     {.i = +1 } },
-	{ KeyPress,      MODKEY|ShiftMask,   XK_k,      movestack,     {.i = -1 } },*/
+	{ KeyPress,      MODKEY|ShiftMask,   XK_j,      movestack,     {.i = +1 } },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_k,      movestack,     {.i = -1 } },
 	{ KeyPress,      MODKEY,             XK_i,      incnmaster,     {.i = +1 } },
 	{ KeyPress,      MODKEY,             XK_d,      incnmaster,     {.i = -1 } },
 	{ KeyPress,      MODKEY,             XK_h,      setmfact,       {.f = -0.015} },

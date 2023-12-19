@@ -1155,15 +1155,15 @@ movestack(const Arg *arg)
 	if (arg->i > 0) {
 		postafter = findclient(after, 1);
 		if (!postafter) return;
-		before->next = after;	
-		cl->next = postafter;
-		after->next = cl;
+//		before->next = after;	
+//		cl->next = postafter;
+//		after->next = cl;
 	} else {
 		prebefore = findclient(before, -1);
 		if (!prebefore) return;
-		prebefore->next = cl;
-		cl->next = before;
-		before->next = after;
+//		prebefore->next = cl;
+//		cl->next = before;
+//		before->next = after;
 	}
 
 	restack(selmon);

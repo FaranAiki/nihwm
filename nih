@@ -8,6 +8,7 @@
 iscommand() {
 	if ! [ -x $(command -v $1) ]; then
 		echo "$1 is not installed."
+		echo "Please install it using the install script or the installer."
 		exit 1
 	fi
 }
@@ -16,7 +17,13 @@ iscommand() {
 iscommand startx
 iscommand nihwm
 iscommand nihwmctl
+iscommand nih-polkit # TODO should I change this to nihpolkit
 iscommand picom # TODO change picom to nihcomp
+
+#iscommand thunar # default file manager 
+iscommand dmenu
+iscommand kitty
+iscommand rofi
 
 # Checking variables
 
@@ -35,7 +42,7 @@ fi
 #	sed 's/gtk-theme-name=.*/gtk-theme-name=Adwaita-dark/g' '~/.config/gtk-3.0/settings.ini' | tee '~/.config/gtk-3.0/settings.ini' 
 # fi
 
-echo Starting nihwm from nih >> $HOME/.nihwm/log.txt
+echo "[($date)] :: starting nihwm from nih" > $HOME/.nihwm/log.txt
 
 # X definitions
 userresources=$HOME/.Xresources
@@ -97,7 +104,10 @@ fi
 # Setup
 feh --bg-scale $HOME/wallpaper.png & # TODO add a carousel inside ~/wallpapers/
 picom -b & # TODO use PhyOS's fork
-nihwm >> $HOME/.nihwm/log.txt 
+nih-polkit &
+nihwm >> $HOME/.nihwm/log.txt # Do not exec 
+
+echo "[($date)] :: nihwm closed" >> $HOME/.nihwm/log.txt
 
 unset XDG_CURRENT_DESKTOP
 unset DESKTOP_SESSION
