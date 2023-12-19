@@ -53,6 +53,7 @@
 Atom getatomprop(Client *c, Atom prop);
 Client *nexttiled(Client *c);
 Client *wintoclient(Window w);
+Client *findclient(Client *c, int i);
 Monitor *createmon(void);
 Monitor *dirtomon(int dir);
 Monitor *recttomon(int x, int y, int w, int h);
@@ -106,6 +107,7 @@ void mappingnotify(XEvent *e);
 void maprequest(XEvent *e);
 void motionnotify(XEvent *e);
 void movemouse(const Arg *arg);
+void movestack(const Arg *arg);
 void pop(Client *);
 void propertynotify(XEvent *e);
 void quit(const Arg *arg);

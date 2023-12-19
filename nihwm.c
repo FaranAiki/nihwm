@@ -633,13 +633,47 @@ expose(XEvent *e)
 }
 
 Client *
-findbefore(Client *c)
+findclient(Client *cl, int nb)
 {
-	Client *tmp;
-	if (c == selmon->clients)
+	Client *c = NULL, *i, *nonmaster = selmon->clients;
+	int nofloating = 0, n = 0;
+
+	if (!cl)
+		cl = selmon->sel;
+
+	if (!cl || (cl->isfullscreen && lockfullscreen))
 		return NULL;
-	for (tmp = selmon->clients; tmp && tmp->next != c; tmp = tmp->next);
-	return tmp;
+
+	// check if there is not a floating window & ignore master focus
+	for (c = selmon->clients; c; c = c->next) {
+		if (ISVISIBLE(c)) { 
+	//		if (n == selmon->nmaster) { nonmaster = c; }
+			if (!c->isfloating) { nofloating = 1; break; }	
+   //		n++;
+		}
+	}
+
+	if (!nofloating && !allownextfloating) return NULL;
+
+	c = NULL; // safety measure
+
+	if (nb > 0) {
+		for (c = cl->next; c && !ISVISIBLE(c); c = c->next);
+		if (!c)
+			for (c = nonmaster; c && !ISVISIBLE(c); c = c->next);
+	} else {
+		for (i = nonmaster; i && i != cl; i = i->next)
+			if (ISVISIBLE(i) && !(nofloating && i->isfloating && !allownextfloating))
+				c = i;
+		if (!c)
+			for (; i; i = i->next)
+				if (ISVISIBLE(i) && !(nofloating && i->isfloating && !allownextfloating))
+					c = i;
+	}
+
+	if (nofloating && c->isfloating && !allownextfloating) return findclient(c ? c : selmon->clients, nb);
+
+	return c;
 }
 
 void
@@ -706,49 +740,13 @@ focusmon(const Arg *arg)
 void
 focusstack(const Arg *arg)
 {
-	Client *c = NULL, *i, *nonmaster = selmon->clients;
-	int nofloating = 0, n = 0;
-
-	if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen))
-		return;
-
-	// check if there is not a floating window & ignore master focus
-	for (c = selmon->clients; c; c = c->next) {
-		if (ISVISIBLE(c)) { 
-	//		if (n == selmon->nmaster) { nonmaster = c; }
-			if (!c->isfloating) { nofloating = 1; break; }	
-   //		n++;
-		}
-	}
-
-	if (!nofloating && !allownextfloating) return;
-
-	c = NULL; // safety measure
-
-	if (arg->i > 0) {
-		for (c = selmon->sel->next; c && !ISVISIBLE(c); c = c->next);
-		if (!c)
-			for (c = nonmaster; c && !ISVISIBLE(c); c = c->next);
-	} else {
-		for (i = nonmaster; i && i != selmon->sel; i = i->next)
-			if (ISVISIBLE(i) && !(nofloating && i->isfloating && !allownextfloating))
-				c = i;
-		if (!c)
-			for (; i; i = i->next)
-				if (ISVISIBLE(i) && !(nofloating && i->isfloating && !allownextfloating))
-					c = i;
-	}
+	Client *c = findclient(selmon->sel, arg->i);
 
 	if (c) {
 		focus(c);
 		restack(selmon);
 		if (iscursorwarp) XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
 	}
-
-	if (nofloating && c->isfloating && !allownextfloating) focusstack(arg);
-
-	printf("\n");
-	fflush(stdout);
 }
 
 Atom
@@ -1141,6 +1139,35 @@ movemouse(const Arg *arg)
 		selmon = m;
 		focus(NULL);
 	}
+}
+
+// NOT the copy from `movestack` patch
+// IMPORTANT should I use moveclient like findclient?
+void
+movestack(const Arg *arg)
+{
+	Client *cl = selmon->sel; // TODO use this if you want to have a moveclient function
+
+	Client *after = findclient(cl, 1), *prebefore, *postafter,
+	       *before = findclient(cl, -1);
+
+	if (after && before)
+	if (arg->i > 0) {
+		postafter = findclient(after, 1);
+		if (!postafter) return;
+		before->next = after;	
+		cl->next = postafter;
+		after->next = cl;
+	} else {
+		prebefore = findclient(before, -1);
+		if (!prebefore) return;
+		prebefore->next = cl;
+		cl->next = before;
+		before->next = after;
+	}
+
+	restack(selmon);
+	arrange(selmon);
 }
 
 // TODO fix for allownextfloat and isoverlay

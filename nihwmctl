@@ -24,6 +24,10 @@ iscommand() {
 
 # TODO optimize this
 
+if [ "$#" -le 1 ]; then
+	1="statusbar"
+fi;
+
 graceful_close() {
 
 rofi -show window -theme nihwm-theme &
@@ -45,7 +49,23 @@ done
 
 }
 
-if [ "$1" = "shutdown" ]; then # SHUTDOWN
+if [ "$1" = "logoutmenu" ]; then
+
+option=$(printf "shutdown\nreboot\nlogout\n" | dmenu)
+
+# No case ... esac
+if [ "$option" = "shutdown" ]; then
+	graceful_close
+	shutdown -P 0
+elif [ "$option" = "logout" ]; then
+	graceful_close
+	kill nihwm # TODO should I use/invoke Mod-Shift-Cmd-Q?
+elif [ "$option" = "reboot" ]; then
+	graceful_close
+	shutdown r -P 0
+fi
+
+elif [ "$1" = "shutdown" ]; then # SHUTDOWN
 
 graceful_close
 

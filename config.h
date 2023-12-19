@@ -56,6 +56,7 @@ const Layout layouts[] = {
  	{ "GGG",      grid },
  	{ "[D]",      deck },
  	{ "|||",      tcl },
+	{ "<C>",      col },
 };
 
 /* tagging; why japs? cuz kanji is easier */
@@ -94,9 +95,11 @@ const Arg startup_tag = { .ui = 1 << 8 }; /* where do you want the startup to be
 /* commands */
 char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 const char *dmenucmd[]    = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-const char *shutdowncmd[] = { "nihwmctl", "shutdown" }; 
-const char *rebootcmd[]   = { "nihwmctl", "reboot" }; // TODO implement this 
+const char *shutdowncmd[] = { "nihwmctl", "shutdown", NULL }; 
+const char *rebootcmd[]   = { "nihwmctl", "reboot", NULL }; // TODO implement this 
 const char *roficmd[]     = { "rofi", "-show", "drun", "-theme", "nihwm-theme", NULL };
+
+const char *logoutmenucmd[] = { "nihwmctl", "logoutmenu", NULL };
 
 const char *termcmd[]     = { USEDTERMINAL, NULL };
 const char *printscr[]    = { "flameshot", "gui", NULL };
@@ -209,6 +212,8 @@ Key keys[] = {
 	
 	{ KeyPress,      MODKEY,             XK_j,      focusstack,     {.i = +1 } },
 	{ KeyPress,      MODKEY,             XK_k,      focusstack,     {.i = -1 } },
+	/*{ KeyPress,      MODKEY|ShiftMask,   XK_j,      movestack,     {.i = +1 } },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_k,      movestack,     {.i = -1 } },*/
 	{ KeyPress,      MODKEY,             XK_i,      incnmaster,     {.i = +1 } },
 	{ KeyPress,      MODKEY,             XK_d,      incnmaster,     {.i = -1 } },
 	{ KeyPress,      MODKEY,             XK_h,      setmfact,       {.f = -0.015} },
@@ -230,7 +235,8 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_o,      setlayout,      {.v = &layouts[6]} }, // TODO modify properly
 	{ KeyPress,      MODKEY,             XK_g,      setlayout,      {.v = &layouts[7]} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_d,      setlayout,      {.v = &layouts[8]} }, 
-	{ KeyPress,      MODKEY|ShiftMask,   XK_t,      setlayout,      {.v = &layouts[9]} }, 
+	{ KeyPress,      MODKEY|ShiftMask,   XK_t,      setlayout,      {.v = &layouts[9]} }, // tcl 
+	{ KeyPress,      MODKEY|ControlMask, XK_c,      setlayout,      {.v = &layouts[10]} }, // col
 
 	{ KeyPress,      MODKEY,             XK_space,  setlayout,         {0} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_space,  togglefloating,    {0} },
@@ -300,8 +306,11 @@ Button buttons[] = {
 	{ ClkWinTitle,          0,              Button5,        focusstack,     {.i = -1 } }, // Scroll down
 	
 	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
+	{ ClkStatusText,        0,              Button3,        spawn,          {.v = logoutmenucmd } },
 	{ ClkStatusText,        0,              Button4,        spawn,          {.v = incvolcmd } },
 	{ ClkStatusText,        0,              Button5,        spawn,          {.v = decvolcmd } },
+	{ ClkStatusText,        ShiftMask,      Button4,        spawn,          {.v = incbrightcmd } },
+	{ ClkStatusText,        ShiftMask,      Button5,        spawn,          {.v = decbrightcmd } },
 
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },

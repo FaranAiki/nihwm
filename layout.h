@@ -7,6 +7,7 @@
 
 void bstack(Monitor *m);
 void bstackhoriz(Monitor *m);
+void col(Monitor *m);
 void deck(Monitor *m);
 void dwindle(Monitor *m);
 void fibonacci(Monitor *m, int s);
