@@ -13,6 +13,13 @@ iscommand() {
 	fi
 }
 
+isoptional() {
+	if ! [ -x $(command -v $1) ]; then
+		echo "$1 is not installed."
+		echo "Please install it using the install script or the installer even though it is optional."
+	fi
+}
+
 # Checking command availability
 iscommand startx
 iscommand nihwm
@@ -24,6 +31,9 @@ iscommand picom # TODO change picom to nihcomp
 iscommand dmenu
 iscommand kitty
 iscommand rofi
+
+# Checking command optionally
+isoptional emoji-selector #from aishki
 
 # Checking variables
 

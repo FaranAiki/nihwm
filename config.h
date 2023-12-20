@@ -132,6 +132,9 @@ const char *xkbcolemak[] = { "setxkbmap", "us", "-variant", "colemak", NULL };
 const char *xkbarabic[] = { "setxkbmap", "ara", NULL };
 const char *xkbjapanese[] = { "setxkbmap", "jp", NULL };
 
+/* optional */
+const char *emojicmd[] = { "emoji-selector", NULL };
+
 /* startup */
 const char **startup[] = {
 	/* command  */
@@ -172,6 +175,8 @@ const Rule rules[] = {
 	{  "Whatsapp-for-linux", "whatsapp-for-linux", NULL, 1 << 5,   0,           -1, },
 	{  "discord",       "discord",      NULL,        1 << 5,       0,           -1, },
 	{  "TelegramDesktop", "telegram-desktop", NULL,  1 << 5,       0,           -1, },
+	
+	{  "robloxplayerbeta.exe", "robloxplayerbeta.exe", NULL,  1 << 5,       0,  -1, },
 
 	{  "obs",           "obs",        NULL,          1 << 6,       0,           -1, },
 	{  "Olive",         "olive-editor",  NULL,       1 << 6,       0,           -1, },
@@ -183,7 +188,7 @@ const Rule rules[] = {
 	{  "Alacritty",     "Alacritty",   NULL,         1 << 8,       0,           -1, },
 	{  "XTerm",         "xterm",   NULL,             1 << 8,       0,           -1, },
 
-	{  "Mousepad",      "mousepad",   NULL,          0,            1,           -1,        1},
+	{  "Mousepad",      "mousepad",   NULL,          3,            1,           -1,        1},
 };
 
 /* Rule workflow */
@@ -292,6 +297,8 @@ Key keys[] = {
 	{ KeyPress,      0,                  XF86XK_AudioNext,         spawn,   {.v = plynextcmd} },
 	{ KeyPress,      0,                  XF86XK_AudioPrev,         spawn,   {.v = plyprevcmd} },
 
+	// Additional, tools, or optional
+	{ KeyPress,      MODKEY,                  XK_e,     spawn,   {.v = emojicmd} },
 };
 
 /* button definitions */
