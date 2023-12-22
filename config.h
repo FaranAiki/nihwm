@@ -12,6 +12,11 @@
 
 #define TRAIN_KEYBOARD_LAYOUT
 
+/* to make LSP not that angry :) */
+#include "nihwm.h"
+
+const char *config_filename  = "/.nihwm/config"; /* nihwm supports config file written in bash, shell, or python */
+
 /* appearance */
 const unsigned int snap      = 32;       /* snap pixel */
 /* unsigned */ int borderpx  = 4;        /* border pixel of windows */
@@ -157,6 +162,8 @@ const Rule rules[] = {
 	 */
 	/* class            instance      title          tags mask     isfloating   monitor    is overlay */
 	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
+	{  "Ardour",        "ardour_ardour",  NULL,      1 << 0,       0,           -1, }, // ergonomic reason
+	{  "Ardour-8.1.0",   "ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot
 	{  "Audacity",      "audacity",   NULL,          1 << 0,       0,           -1, },
 	{  "OpenUtau",      "OpenUtau",   NULL,          1 << 0,       0,           -1, },
 
@@ -185,6 +192,8 @@ const Rule rules[] = {
 	{  "Inkscape",  "org.inkscape.Inkscape", NULL,   1 << 7,       0,           -1, },
 
 	{  "kitty",         "kitty",   NULL,             1 << 8,       0,           -1, },
+	{  "st",            "st",      NULL,             1 << 8,       0,           -1, },
+	{  "neovide",       "neovide",      NULL,        1 << 8,       0,           -1, },
 	{  "Alacritty",     "Alacritty",   NULL,         1 << 8,       0,           -1, },
 	{  "XTerm",         "xterm",   NULL,             1 << 8,       0,           -1, },
 

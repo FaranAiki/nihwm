@@ -3,6 +3,8 @@
 #ifndef DATATYPES_H
 #define DATATYPES_H
 
+#include <X11/Xlib.h>
+
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel }; /* color schemes */

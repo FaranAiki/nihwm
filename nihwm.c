@@ -2313,6 +2313,11 @@ zoom(const Arg *arg) {
 int
 main(int argc, char *argv[])
 {
+	Arg arg;
+	char *homedir, configfile[256];
+	
+    char *execconfig[] = { "/bin/sh", "-c", configfile, NULL };
+
 	if (argc == 2 && !strcmp("-v", argv[1]))
 		die("nihwm-"VERSION);
 	else if (argc == 2 && !strcmp("-h", argv[1]))
@@ -2326,7 +2331,10 @@ main(int argc, char *argv[])
 
 	if (argc >= 2 && strcmp("-replace", argv[1]))
 		checkotherwm();
-	
+
+	if (!(homedir = getenv("HOME")))
+		homedir = getpwuid(getuid())->pw_dir;
+
 	setup();
 
 #ifdef __OpenBSD__
@@ -2334,8 +2342,15 @@ main(int argc, char *argv[])
 		die("pledge");
 #endif /* __OpenBSD__ */
 	
-	spawn(&nihwmctl_start);
+	spawn(&nihwmctl_start); /* remove this or no? */
 	if (argc == 1 || strcmp("-no-startapp", argv[1]) != 0) startapp(); // auto start application
+
+	/* config files, can be bash, shell, or even python */
+	strncpy(configfile, homedir, 256);
+	strncat(configfile, config_filename, 256 - strlen(config_filename));
+
+	arg.v = execconfig;
+	spawn(&arg);
 
 	scan();
 
