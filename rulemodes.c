@@ -19,6 +19,7 @@ int iscompositoractive    = 1;    /* 1 means compositor (picom, picom-fork, nihc
 int iscursorwarp          = 0;    /* 1 means cursor warp i.e. if focusstack, the mouse will warp/move to the current focused client */
 int showoverlay           = 0;    /* 1 means show the overlay (Mod-Shift-W windows: at start, Rhythmbox and Mousepad) */
 int switchonfocus         = 0;    /* 1 means change to the current window which requests a focus */
+int btrresizing           = 1;    /* 1 means the resize (Mod+Mouse) is like in the normal dwm */
 
 /* array */
 const long stf[2][1] = {
@@ -52,6 +53,7 @@ initcusatom()
 	cusatom[CusShowOverlay] = XInternAtom(dpy, "_NIHWM_SHOW_OVERLAY", False);
 	cusatom[CusCursorWarp] = XInternAtom(dpy, "_NIHWM_CURSOR_WARP", False);
 	cusatom[CusIgnoreMasterFocus] = XInternAtom(dpy, "_NIHWM_IGNORE_MASTER_FOCUS", False); // TODO implement this
+	cusatom[CusBottomRightResizing] = XInternAtom(dpy, "_NIHWM_BOTTOM_RIGHT_RESIZING", False); // TODO implement this
 
 	cusatom[CusNumOfMaster] = XInternAtom(dpy, "_NIHWM_NUMBER_OF_MASTER", False);
 }
@@ -72,10 +74,12 @@ setupcusatom()
 	XChangeProperty(dpy, root, cusatom[CusShowOverlay], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[showoverlay], 1 );	
 	XChangeProperty(dpy, root, cusatom[CusIgnoreMasterFocus], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) stf[ignoremasterfocus], 1);
+		PropModeReplace, (unsigned char *) stf[ignoremasterfocus], 1);
+	XChangeProperty(dpy, root, cusatom[CusBottomRightResizing], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[btrresizing], 1);
 
 	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) numofmaster, 1);
+		PropModeReplace, (unsigned char *) numofmaster, 1);
 }
 
 void
@@ -153,5 +157,14 @@ togglecursorwarp(const Arg *arg)
 
 	XChangeProperty(dpy, root, cusatom[CusCursorWarp], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) stf[iscursorwarp], 1);	
+}
+
+void
+togglebtrresizing(const Arg *arg)
+{
+	SSWITCH(btrresizing);
+	
+	XChangeProperty(dpy, root, cusatom[CusBottomRightResizing], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[btrresizing], 1);
 }
 

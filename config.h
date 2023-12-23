@@ -14,6 +14,7 @@
 
 /* to make LSP not that angry :) */
 #include "nihwm.h"
+#include "rulemodes.h"
 
 const char *config_filename  = "/.nihwm/config"; /* nihwm supports config file written in bash, shell, or python */
 
@@ -284,6 +285,7 @@ Key keys[] = {
 	{ KeyPress,      MODKEY|ShiftMask,   XK_f,      toggleswitchonfocus,     {-1} }, // ignore popup focus
 	{ KeyPress,      MODKEY|ShiftMask,   XK_a,      toggleattachbelow,       {-1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_m,      toggleignoremasterfocus, {-1} },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_r,      togglebtrresizing,       {-1} },
 
 #ifdef TRAIN_KEYBOARD_LAYOUT
 	{ KeyPress,      MODKEY,             XK_F1,     spawn,          {.v = xkbqwerty} }, 	

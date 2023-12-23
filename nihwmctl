@@ -80,6 +80,10 @@ elif [ "$1" = "reboot" ]; then # REBOOT
 	graceful_close; reboot
 	exit 0
 
+elif [ "$1" = "set" ]; then
+	echo set
+	#send a signal into dwm
+
 ## THIS IS WHERE NIHWM's STATUSBAR is DEFINED ##
 ## TODO DONT USE XSETROOT BECAUSE OF WMNAME DESTROYS NEOFETCH ##
 elif [ "$1" = "statusbar" ]; then # STATUSBAR
@@ -157,12 +161,20 @@ do
 		ignoremasterfocus=''
 	fi
 
-	# Ignore master focus in stack
+	# Cursor warp
 	iscursorwarp=$(xprop -root _NIHWM_CURSOR_WARP | cut -d"=" -f2)
 	if [ "$iscursorwarp" = ' 1' ]; then
 		iscursorwarp='^'
 	else
 		iscursorwarp=''
+	fi
+
+	# 
+	btrresizing=$(xprop -root _NIHWM_BOTTOM_RIGHT_RESIZING | cut -d"=" -f2)
+	if [ "$btrresizing" = ' 1' ]; then
+		btrresizing='R'
+	else
+		btrresizing=''
 	fi
 
 	# Battery checker
@@ -172,7 +184,7 @@ do
 	fi
 
 	# All the rules, capslock, et cetera
-	condition="${nums}${caps}${showoverlay}${iscursorwarp}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
+	condition="${nums}${caps}${showoverlay}${btrresizing}${iscursorwarp}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
 	
 	# Set status bar
 	! xsetroot -name "[$condition] | $(date) | ${volume} | ${battery} | nihwm" && exit 69

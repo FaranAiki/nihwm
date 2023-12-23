@@ -1316,10 +1316,14 @@ resizemouse(const Arg *arg)
 
 	if (!getrootptr(&tx, &ty)) return;
 
+	if (!btrresizing) {
+		tx = c->w + c->bw - 1;
+		ty = c->h + c->bw - 1;
+	}
 	//**/
 	/* if (arg && arg->i) {
 		res_type = arg->i; TODO implement center resize	
-	} else*/ if (tx >= c->w/2 + c->x && ty >= c->h/2 + c->y) { // default
+	} */ else if (tx >= c->w/2 + c->x && ty >= c->h/2 + c->y) { // default
 		res_type = BottomRight; 
 		tx = c->w + c->bw - 1; ty = c->h + c->bw - 1;
 	} else if (tx < c->w/2 + c->x && ty >= c->h/2 + c->y) {
@@ -1360,7 +1364,9 @@ resizemouse(const Arg *arg)
 					togglefloating(NULL);
 			}
 			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
-				switch (res_type) {
+				if (!btrresizing)
+					resize(c, c->x, c->y, nw, nh, 1);
+				else switch (res_type) {
 					case TopLeft: resize(c, nw, nh, c->w - nw + c->x, c->y - nh + c->h, 1); break;
 					case TopRight: resize(c, c->x, nh, nw, c->y - nh + c->h, 1); break;
 					case BottomLeft: resize(c, nw, c->y, c->w - nw + c->x, nh, 1); break;

@@ -40,6 +40,7 @@ dist: clean
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
+	mkdir -p ${CONFIG}
 	
 	cp -f nihwm ${DESTDIR}${PREFIX}/bin
 	cp -f nihwmctl ${DESTDIR}${PREFIX}/bin
@@ -63,13 +64,16 @@ install: all
 	mkdir -p ${CONFIG}/rofi
 	cp -f nihwm-theme.rasi ${CONFIG}/rofi	
 	
-	if ! [ -f ${CONFIG}/wallpaper.png ]
-		cp -f wallpaper.png ${CONFIG}
-	fi
+	#cp -f nihcomp.conf ${CONFIG}/nihcomp.conf
+	cp -f nihcomp.conf ${CONFIG}/picom.conf
 	
-	if ! [ -f ${NIHWM_FOLDER}/config ]; then
-		echo "#!/bin/sh" > ${NIHWM_FOLDER}/config 
-	fi
+	if ! [ -f ${CONFIG}/wallpaper.png ]; then \
+		cp -f wallpaper.png ${CONFIG}; \
+	fi;
+	
+	if ! [ -f ${NIHWM_FOLDER}/config ]; then \
+		echo "#!/bin/sh" > ${NIHWM_FOLDER}/config; \
+	fi;
 
 uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/nihwm\

@@ -9,6 +9,7 @@
 
 enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating,
 	   CusShowOverlay, CusIgnoreMasterFocus, CusNumOfMaster, CusCursorWarp,
+	   CusBottomRightResizing,
 	   CusLast,}; /* custom atoms */
 
 /* this is where all the rulemodes are defined */
@@ -19,6 +20,7 @@ extern int iscompositoractive;
 extern int iscursorwarp; 
 extern int showoverlay;
 extern int switchonfocus;
+extern int btrresizing;
 
 extern const long stf[2][1];
 
@@ -27,6 +29,7 @@ void initcusatom(void);
 void toggleattachbelow(const Arg *arg);
 void togglealwaysontop(const Arg *arg);
 void toggleallownextfloating(const Arg *arg);
+void togglebtrresizing(const Arg *arg);
 void togglecompositor(const Arg *arg);
 void togglecursorwarp(const Arg *arg);
 void toggleswitchonfocus(const Arg *arg);
