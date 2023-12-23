@@ -584,7 +584,7 @@ drawbar(Monitor *m)
 			if (m->sel->isfloating) {
 				drw_rect(drw, x + boxs + tlpad - lrpad / 2, boxs, boxw, boxw, m->sel->isfixed, 0);
 				if (m->sel->isalwaysontop)
-					drw_rect(drw, x + boxs, bh - boxw, boxw, boxw, 0, 0);
+					drw_rect(drw, x + boxs + tlpad - lrpad / 2, bh - boxw, boxw, boxw, 0, 0);
 			}
 		} else {
 			drw_setscheme(drw, scheme[SchemeNorm]);
