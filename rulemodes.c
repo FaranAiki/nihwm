@@ -9,17 +9,59 @@ extern Window root;
 extern Atom cusatom[CusLast];
 extern Monitor *mons, *selmon; 
 
-extern int colsel;
+const Signal signals[] = {
+	/* signum               function */
+	{ "focusstack",         focusstack },
+	{ "mfact",              setmfact },
+	{ "bar",                togglebar },
+	{ "nmaster",            incnmaster },
+	{ "floating",           togglefloating },
+	{ "focusmon",           focusmon },
+	{ "tagmon",             tagmon },
+	{ "zoom",               zoom },
+	{ "view",               view },
+	// { "viewall",            viewall },
+	// { "viewex",             viewex },
+	{ "toggleview",         view },
+	// { "toggleviewex",       toggleviewex },
+	{ "tag",                tag },
+	// { "tagall",             tagall },
+	// { "tagex",              tagex },
+	{ "toggletag",          tag },
+	// { "toggletagex",    toggletagex },
+	{ "killclient",         killclientsel },
+	{ "quit",               quit },
+	{ "layout",             setlayout },
+	// { "setlayoutex",    setlayoutex },
+
+	{ "allownextfloating",  toggleallownextfloating },	
+	{ "compositor",         togglecompositor },
+	{ "cursorwrap",         togglecursorwarp },
+	{ "attachbelow",        toggleattachbelow },
+	{ "ignoremasterfocus",  toggleignoremasterfocus },
+	{ "overlay",            toggleoverlay },
+	{ "switchonfocus",      toggleswitchonfocus },
+	{ "btrresizing",        togglebtrresizing },
+	{ "btr",                togglebtrresizing },
+};
 
 /* this is where all the rulemodes are defined */
 int allownextfloating     = 0;    /* 1 means focusstack allows next window to be floating */
-int ignoremasterfocus     = 0;    /* 1 means ignore master in focusstack function, useful for deck */
+int ignoremasterfocus      = 0;    /* 1 means ignore master in focusstack function, useful for deck */
 int isattachbelow         = 1;    /* 1 means attach at the end [nonmaster, decreasing] */
 int iscompositoractive    = 1;    /* 1 means compositor (picom, picom-fork, nihcomp) is active */
 int iscursorwarp          = 0;    /* 1 means cursor warp i.e. if focusstack, the mouse will warp/move to the current focused client */
 int showoverlay           = 0;    /* 1 means show the overlay (Mod-Shift-W windows: at start, Rhythmbox and Mousepad) */
 int switchonfocus         = 0;    /* 1 means change to the current window which requests a focus */
 int btrresizing           = 1;    /* 1 means the resize (Mod+Mouse) is like in the normal dwm */
+
+/* appearance */
+const unsigned int snap      = 32;       /* snap pixel */
+/* unsigned */ int borderpx  = 4;        /* border pixel of windows */
+/* unsigned */ int gappx     = 16;       /* gap pixel of the window */
+
+int showbar                  = 1;        /* 0 means no bar */
+int topbar                   = 1;        /* 0 means bottom bar */
 
 /* array */
 const long stf[2][1] = {
@@ -166,5 +208,53 @@ togglebtrresizing(const Arg *arg)
 	
 	XChangeProperty(dpy, root, cusatom[CusBottomRightResizing], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[btrresizing], 1);
+}
+
+// copy from dwmc
+int
+signalhandle()
+{
+	char fsignal[256], paramsignal[256];
+	char indicator[8] = "signal:";
+	char str_sig[256];
+	char param[64];
+	int i, len_str_sig, n, paramn;
+	size_t len_fsignal, len_indicator = strlen(indicator);
+	Arg arg; arg.v = 0;
+
+	if (gettextprop(root, XA_WM_NAME, fsignal, sizeof(fsignal))) {
+		len_fsignal = strlen(fsignal);
+
+		if (len_indicator > len_fsignal ? 0 : !strncmp(indicator, fsignal, len_indicator)) {
+
+			paramn = sscanf(fsignal+len_indicator, "%s%n%s%n", str_sig, &len_str_sig, param, &n);
+
+			if (paramn == 1) arg = (Arg) {0};
+			else if (paramn > 2) return 1;
+			else if (!strncmp(param, "i", n - len_str_sig) || !strncmp(param, "int", len_str_sig))
+				sscanf(fsignal + len_indicator + n, "%i", &(arg.i));
+			else if (!strncmp(param, "ui", n - len_str_sig) || !strncmp(param, "unsigned", len_str_sig))
+				sscanf(fsignal + len_indicator + n, "%u", &(arg.ui));
+			else if (!strncmp(param, "f", n - len_str_sig) || !strncmp(param, "float", len_str_sig))
+				sscanf(fsignal + len_indicator + n, "%f", &(arg.f));
+			else if (!strncmp(param, "s", n - len_str_sig) || !strncmp(param, "string", len_str_sig)) {
+				sscanf(fsignal + len_indicator + n, "%s", paramsignal);
+				arg.v = paramsignal;
+			}
+			else return 0;
+
+			
+			for (i = 0; i < LENGTH(signals); i++)
+				if (!strncmp(str_sig, signals[i].signal, len_str_sig) && signals[i].func) {	
+					NIH_LOG(("%s::%d\n", str_sig, len_str_sig));
+					NIH_LOG(("%s::%d\n", param, n));
+					signals[i].func(&arg);
+				}
+
+			return 1;
+		}
+	}
+
+	return 0;
 }
 

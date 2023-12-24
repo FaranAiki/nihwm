@@ -22,10 +22,33 @@ iscommand() {
 	fi
 }
 
+sendsignal() {
+	xsetroot -name "signal:$*"
+	echo "sent $*"
+}
+
 iscommand rofi
 iscommand xprop
 iscommand wmctrl
-iscommand appax
+iscommand xsetroot
+
+# Init variables
+function initvar() {
+	battery=$(upower -i $(upower -e | grep 'BAT') | grep 'percentage' | cut -d " " -f15)
+	btrresizing=$(xprop -root _NIHWM_BOTTOM_RIGHT_RESIZING | cut -d"=" -f2)
+	iscursorwarp=$(xprop -root _NIHWM_CURSOR_WARP | cut -d"=" -f2)
+	ignoremasterfocus=$(xprop -root _NIHWM_IGNORE_MASTER_FOCUS | cut -d"=" -f2)
+	showoverlay=$(xprop -root _NIHWM_SHOW_OVERLAY | cut -d"=" -f2)
+	allownextfloating=$(xprop -root _NIHWM_ALLOW_NEXT_FLOATING | cut -d"=" -f2)
+	attachbelow=$(xprop -root _NIHWM_ATTACH_BELOW | cut -d"=" -f2)
+	compositoractive=$(xprop -root _NIHWM_USING_COMPOSITOR | cut -d"=" -f2)
+	focusmode=$(xprop -root _NIHWM_FOCUS_CHANGE | cut -d"=" -f2)
+	nums=$(xset q | grep 'Nums Lock' | awk '{print $8}')
+	caps=$(xset q | grep 'Caps Lock' | awk '{print $4}')
+	volume=$(amixer get Master | grep 'Right:.*\(.*\)' | cut -d" " -f7)
+}
+
+initvar
 
 # TODO optimize this
 
@@ -80,9 +103,20 @@ elif [ "$1" = "reboot" ]; then # REBOOT
 	graceful_close; reboot
 	exit 0
 
+# TODO implement this properly
 elif [ "$1" = "set" ]; then
-	echo set
-	#send a signal into dwm
+	shift 1
+	sendsignal $@
+
+elif [ "$1" = "get" ]; then
+	if [ "$#" -lt 2 ]; then
+		printenv	
+	else
+		shift 1
+		for i in "$@"; do
+			eval "echo \$$i"
+		done
+	fi
 
 ## THIS IS WHERE NIHWM's STATUSBAR is DEFINED ##
 ## TODO DONT USE XSETROOT BECAUSE OF WMNAME DESTROYS NEOFETCH ##
@@ -91,14 +125,11 @@ elif [ "$1" = "statusbar" ]; then # STATUSBAR
 while true
 do
 
-	# Only use Right because of Mono
-	volume=$(amixer get Master | grep 'Right:.*\(.*\)' | cut -d" " -f7)
+	initvar
 
 	# Battery
-	battery=$(upower -i $(upower -e | grep 'BAT') | grep 'percentage' | cut -d " " -f15)
 
 	# Is Capslock
-	caps=$(xset q | grep 'Caps Lock' | awk '{print $4}')
 	if [ "$caps" = "on" ]; then
 		caps='C'
 	else
@@ -106,7 +137,6 @@ do
 	fi
 
 	# Is NumLock
-	nums=$(xset q | grep 'Nums Lock' | awk '{print $8}')
 	if [ "$nums" = "on" ]; then
 		nums='N'
 	else
@@ -114,7 +144,6 @@ do
 	fi
 
 	# Is Focus On Switch
-	focusmode=$(xprop -root _NIHWM_FOCUS_CHANGE | cut -d"=" -f2)
 	if [ "$focusmode" = ' 1' ]; then
 		focusmode='F'
 	else
@@ -122,7 +151,6 @@ do
 	fi
 
 	# Compositor
-	compositoractive=$(xprop -root _NIHWM_USING_COMPOSITOR | cut -d"=" -f2)
 	if [ "$compositoractive" = ' 1' ]; then
 		compositoractive='@'
 	else
@@ -130,7 +158,6 @@ do
 	fi
 
 	# Attach below
-	attachbelow=$(xprop -root _NIHWM_ATTACH_BELOW | cut -d"=" -f2)
 	if [ "$attachbelow" = ' 1' ]; then
 		attachbelow='a'
 	else
@@ -138,7 +165,6 @@ do
 	fi
 
 	# Allow next floating
-	allownextfloating=$(xprop -root _NIHWM_ALLOW_NEXT_FLOATING | cut -d"=" -f2)
 	if [ "$allownextfloating" = ' 1' ]; then
 		allownextfloating='_'
 	else
@@ -146,7 +172,6 @@ do
 	fi
 
 	# Allow next floating
-	showoverlay=$(xprop -root _NIHWM_SHOW_OVERLAY | cut -d"=" -f2)
 	if [ "$showoverlay" = ' 1' ]; then
 		showoverlay='w'
 	else
@@ -154,7 +179,6 @@ do
 	fi
 
 	# Ignore master focus in stack
-	ignoremasterfocus=$(xprop -root _NIHWM_IGNORE_MASTER_FOCUS | cut -d"=" -f2)
 	if [ "$ignoremasterfocus" = ' 1' ]; then
 		ignoremasterfocus='M'
 	else
@@ -162,7 +186,6 @@ do
 	fi
 
 	# Cursor warp
-	iscursorwarp=$(xprop -root _NIHWM_CURSOR_WARP | cut -d"=" -f2)
 	if [ "$iscursorwarp" = ' 1' ]; then
 		iscursorwarp='^'
 	else
@@ -170,7 +193,6 @@ do
 	fi
 
 	# 
-	btrresizing=$(xprop -root _NIHWM_BOTTOM_RIGHT_RESIZING | cut -d"=" -f2)
 	if [ "$btrresizing" = ' 1' ]; then
 		btrresizing='R'
 	else

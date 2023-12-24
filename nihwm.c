@@ -1194,7 +1194,9 @@ propertynotify(XEvent *e)
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
 
-	if ((ev->window == root) && (ev->atom == XA_WM_NAME))
+	// REMINDER should I update status in each nihwmctl iteration, not propertynotify?
+	// TODO fix this
+	if ((ev->window == root) && (ev->atom == XA_WM_NAME) && !signalhandle())
 		updatestatus();
 	else if (ev->state == PropertyDelete)
 		return; /* ignore */
@@ -1316,14 +1318,10 @@ resizemouse(const Arg *arg)
 
 	if (!getrootptr(&tx, &ty)) return;
 
-	if (!btrresizing) {
-		tx = c->w + c->bw - 1;
-		ty = c->h + c->bw - 1;
-	}
 	//**/
 	/* if (arg && arg->i) {
 		res_type = arg->i; TODO implement center resize	
-	} */ else if (tx >= c->w/2 + c->x && ty >= c->h/2 + c->y) { // default
+	}  else */ if ((tx >= c->w/2 + c->x && ty >= c->h/2 + c->y) || btrresizing) { // default
 		res_type = BottomRight; 
 		tx = c->w + c->bw - 1; ty = c->h + c->bw - 1;
 	} else if (tx < c->w/2 + c->x && ty >= c->h/2 + c->y) {
@@ -1336,9 +1334,6 @@ resizemouse(const Arg *arg)
 		res_type = TopLeft; 
 		tx = c->x + c->bw + 1; ty = c->y + c->bw - 1;
 	} /**/
-
-	printf("warp to %d %d\nbut from %d %d\n", tx, ty, c->x, c->y);
-	fflush(stdout);
 
 	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, tx, ty);
 	// tx = c->w + c->bw -1; ty = c->h + c->bw - 1;
@@ -1363,10 +1358,9 @@ resizemouse(const Arg *arg)
 				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
 					togglefloating(NULL);
 			}
+			// TODO implement this correctly
 			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
-				if (!btrresizing)
-					resize(c, c->x, c->y, nw, nh, 1);
-				else switch (res_type) {
+				switch (res_type) {
 					case TopLeft: resize(c, nw, nh, c->w - nw + c->x, c->y - nh + c->h, 1); break;
 					case TopRight: resize(c, c->x, nh, nw, c->y - nh + c->h, 1); break;
 					case BottomLeft: resize(c, nw, c->y, c->w - nw + c->x, nh, 1); break;
@@ -1402,7 +1396,7 @@ restack(Monitor *m)
 	/* raise the aot window */
 	for(Monitor *m_search = mons; m_search; m_search = m_search->next){
 		for(c = m_search->clients; c; c = c->next){
-			if(c->isalwaysontop){
+			if(c->isalwaysontop || c->isoverlay){
 				XRaiseWindow(dpy, c->win);
 				break;
 			}

@@ -18,14 +18,6 @@
 
 const char *config_filename  = "/.nihwm/config"; /* nihwm supports config file written in bash, shell, or python */
 
-/* appearance */
-const unsigned int snap      = 32;       /* snap pixel */
-/* unsigned */ int borderpx  = 4;        /* border pixel of windows */
-/* unsigned */ int gappx     = 16;       /* gap pixel of the window */
-
-int showbar                  = 1;        /* 0 means no bar */
-int topbar                   = 1;        /* 0 means bottom bar */
-
 const char *fonts[]          = { "monospace:size=10" };
 const char dmenufont[]       = "monospace:size=10";
 

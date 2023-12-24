@@ -5,6 +5,8 @@
 
 #include <X11/Xlib.h>
 
+#define NIH_LOG(X) printf X; fflush(stdout);
+
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel }; /* color schemes */
@@ -95,5 +97,10 @@ typedef struct {
 	int monitor;
 	int isoverlay;
 } Rule;
+
+typedef struct {
+	const char *signal;
+	void (*func)(const Arg *);
+} Signal;
 
 #endif /* DATATYPES_H */

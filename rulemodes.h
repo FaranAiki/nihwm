@@ -12,6 +12,8 @@ enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloati
 	   CusBottomRightResizing,
 	   CusLast,}; /* custom atoms */
 
+extern const Signal signals[];
+
 /* this is where all the rulemodes are defined */
 extern int allownextfloating;
 extern int ignoremasterfocus;
@@ -21,6 +23,15 @@ extern int iscursorwarp;
 extern int showoverlay;
 extern int switchonfocus;
 extern int btrresizing;
+
+extern int col_sel;
+
+extern const unsigned int snap;
+extern /* unsigned */ int borderpx;
+extern /* unsigned */ int gappx;
+
+extern int showbar;
+extern int topbar;
 
 extern const long stf[2][1];
 
@@ -36,6 +47,12 @@ void toggleswitchonfocus(const Arg *arg);
 void toggleoverlay(const Arg *arg);
 void toggleignoremasterfocus(const Arg *arg);
 void setupcusatom(void);
+int signalhandle(void);
+
+/* functions for signals, nihwmctl */
+void settopbar(const Arg *arg);
+void setsnap(const Arg *arg);
+void setgappx(const Arg *arg);
 
 /* constants */
 extern const char *nihwmctl_kill_[];
