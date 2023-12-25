@@ -228,7 +228,7 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_bracketleft,  incngappx, {.i = -2 } },
 	{ KeyPress,      MODKEY,             XK_bracketright, incngappx, {.i = +2 } },
 
-	{ KeyPress,      MODKEY|ControlMask, XK_k,      setkeymode,     {.i = 1}, },
+	{ KeyPress,      MODKEY|ControlMask, XK_k,      setkeymode,     {.i = KeymodeControl}, },
 
 	{ KeyPress,      MODKEY,             XK_Return, zoom,           {0} },
 	{ KeyPress,      MODKEY,             XK_Tab,    view,           {0} },

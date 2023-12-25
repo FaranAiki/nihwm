@@ -9,6 +9,10 @@
  *
  * TODO combine this with picom (idc what fork)
  *
+ * Why nihwm is "special"
+ * 1. usage of rulemode
+ * 2. usage of keymode
+ * 3. default handling for some programs
  */
 
 /* include the main file */
@@ -897,7 +901,12 @@ keypress(XEvent *e)
 	XKeyEvent *ev;
 
 	ev = &e->xkey;
+	// TODO don't use XKeyCodeToKeysym
 	keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
+
+	if (keymode == KeymodeControl)
+		ev->state |= MODKEY;
+
 	for (i = 0; i < LENGTH(keys); i++)
 		if (keysym == keys[i].keysym
 		&& (keys[i].disable ? *keys[i].disable : 1)

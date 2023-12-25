@@ -138,7 +138,10 @@ setkeymode(const Arg *arg)
 		return;
 	}
 
-	keymode = arg->i;
+	if (keymode == KeymodeControl && arg->i == KeymodeControl)
+		keymode = KeymodeNormal;
+	else
+		keymode = arg->i;
 	updatekeymode();
 }
 
