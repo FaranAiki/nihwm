@@ -9,7 +9,7 @@
 
 enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating,
 	   CusShowOverlay, CusIgnoreMasterFocus, CusNumOfMaster, CusCursorWarp,
-	   CusBottomRightResizing, CusTagClick,
+	   CusBottomRightResizing, CusTagClick, CusKeymode,
 	   CusLast,}; /* custom atoms */
 
 enum {
@@ -21,6 +21,9 @@ enum {
 extern const Signal signals[];
 
 extern int keymode;
+
+extern long numofmaster[1];
+extern long curkeymode[1];
 
 /* this is where all the rulemodes are defined */
 extern int allownextfloating;

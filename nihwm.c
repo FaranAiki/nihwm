@@ -260,7 +260,10 @@ buttonpress(XEvent *e)
 		click = ClkClientWin;
 	}
 	for (i = 0; i < LENGTH(buttons); i++)
-		if (click == buttons[i].click && (buttons[i].disable ? *buttons[i].disable : 1) && buttons[i].func && buttons[i].button == ev->button
+		if (click == buttons[i].click
+		&& (buttons[i].disable ? *buttons[i].disable : 1)
+		&& buttons[i].func
+		&& buttons[i].button == ev->button
 		&& CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state))
 			buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
 }
@@ -729,7 +732,7 @@ focusmon(const Arg *arg)
 	selmon = m;
 	focus(NULL);
 
-	long numofmaster[] = { selmon->nmaster };
+	numofmaster[0] = selmon->nmaster ;
 
 	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) numofmaster, 1);
@@ -856,9 +859,12 @@ grabkeys(void)
 		XUngrabKey(dpy, AnyKey, AnyModifier, root);
 		for (i = 0; i < LENGTH(keys); i++)
 			if ((code = XKeysymToKeycode(dpy, keys[i].keysym)))
-				for (j = 0; j < LENGTH(modifiers); j++)
+				for (j = 0; j < LENGTH(modifiers); j++) {
 					XGrabKey(dpy, code, keys[i].mod | modifiers[j], root,
 						True, GrabModeAsync, GrabModeAsync);
+					if (keymode == KeymodeControl) XGrabKey(dpy, code, keys[i].mod & ~MODKEY, root,
+						True, GrabModeAsync, GrabModeAsync);
+				}
 	}
 }
 
@@ -901,16 +907,18 @@ keypress(XEvent *e)
 	XKeyEvent *ev;
 
 	ev = &e->xkey;
-	// TODO don't use XKeyCodeToKeysym
+	// TODO don't use XKeyCodeToKeysym... maybe?
 	keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
 
 	if (keymode == KeymodeControl)
 		ev->state |= MODKEY;
 
+	NIH_LOG(("mod: %b; ev-state: %b; keymode: %d\n", CLEANMASK(keys[1].mod), CLEANMASK(ev->state), keymode))
+
 	for (i = 0; i < LENGTH(keys); i++)
 		if (keysym == keys[i].keysym
 		&& (keys[i].disable ? *keys[i].disable : 1)
-		&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
+		&& CLEANMASK(keys[i].mod) == (CLEANMASK(ev->state) | (keymode == KeymodeControl ? MODKEY : 0))
 		&& ev->type == keys[i].type
 		&& keys[i].func)
 			keys[i].func(&(keys[i].arg));

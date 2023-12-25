@@ -81,6 +81,9 @@ const long stf[2][1] = {
 	{1},
 }; 
 
+/* is this needed? */
+long curkeymode[1], numofmaster[1];
+
 /* constants */
 const char *nihwmctl_kill_[]  = {"killall", "nihwmctl", NULL};
 const char *nihwmctl_start_[] = {"nihwmctl", "statusbar", NULL};
@@ -100,7 +103,12 @@ const Arg nihwmctl_compo_kill = { .v = nihwmctl_compo_kill_ };
 void
 updatekeymode()
 {
-	/* do something */
+	/*long*/ curkeymode[0] = keymode;
+
+	XChangeProperty(dpy, root, cusatom[CusKeymode], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) curkeymode, 1);
+
+	grabkeys();
 }
 
 void
@@ -142,6 +150,7 @@ setkeymode(const Arg *arg)
 		keymode = KeymodeNormal;
 	else
 		keymode = arg->i;
+
 	updatekeymode();
 }
 
@@ -157,6 +166,7 @@ initcusatom()
 	cusatom[CusIgnoreMasterFocus] = XInternAtom(dpy, "_NIHWM_IGNORE_MASTER_FOCUS", False); // TODO implement this
 	cusatom[CusBottomRightResizing] = XInternAtom(dpy, "_NIHWM_BOTTOM_RIGHT_RESIZING", False); // TODO properly implement this
 	cusatom[CusTagClick] = XInternAtom(dpy, "_NIHWM_TAG_CLICK", False); 
+	cusatom[CusKeymode] = XInternAtom(dpy, "_NIHWM_KEYMODE", False); 
 
 	cusatom[CusNumOfMaster] = XInternAtom(dpy, "_NIHWM_NUMBER_OF_MASTER", False);
 }
@@ -164,7 +174,8 @@ initcusatom()
 void
 setupcusatom()
 {
-	long numofmaster[] = { selmon->nmaster }; 
+	numofmaster[0] = selmon->nmaster;
+	curkeymode[0] = keymode;
 
 	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[switchonfocus], 1 );
@@ -182,7 +193,9 @@ setupcusatom()
 		PropModeReplace, (unsigned char *) stf[btrresizing], 1);
 	XChangeProperty(dpy, root, cusatom[CusTagClick], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[istagclick], 1);
-
+	
+	XChangeProperty(dpy, root, cusatom[CusKeymode], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) curkeymode, 1);
 	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) numofmaster, 1);
 }
