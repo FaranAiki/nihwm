@@ -1,6 +1,7 @@
 #!/bin/sh
 
 #define VERSION 0.11
+NIHWMCTL_VERSION=0.11
 
 # The X Set Root
 # Display Style here
@@ -35,6 +36,10 @@ iscommand xsetroot
 # Init variables
 function initvar() {
 	battery=$(upower -i $(upower -e | grep 'BAT') | grep 'percentage' | cut -d " " -f15)
+	volume=$(amixer get Master | grep 'Right:.*\(.*\)' | cut -d" " -f7)
+	nums=$(xset q | grep 'Nums Lock' | awk '{print $8}')
+	caps=$(xset q | grep 'Caps Lock' | awk '{print $4}')
+
 	btrresizing=$(xprop -root _NIHWM_BOTTOM_RIGHT_RESIZING | cut -d"=" -f2)
 	iscursorwarp=$(xprop -root _NIHWM_CURSOR_WARP | cut -d"=" -f2)
 	ignoremasterfocus=$(xprop -root _NIHWM_IGNORE_MASTER_FOCUS | cut -d"=" -f2)
@@ -43,9 +48,8 @@ function initvar() {
 	attachbelow=$(xprop -root _NIHWM_ATTACH_BELOW | cut -d"=" -f2)
 	compositoractive=$(xprop -root _NIHWM_USING_COMPOSITOR | cut -d"=" -f2)
 	focusmode=$(xprop -root _NIHWM_FOCUS_CHANGE | cut -d"=" -f2)
-	nums=$(xset q | grep 'Nums Lock' | awk '{print $8}')
-	caps=$(xset q | grep 'Caps Lock' | awk '{print $4}')
-	volume=$(amixer get Master | grep 'Right:.*\(.*\)' | cut -d" " -f7)
+	tagclick=$(xprop -root _NIHWM_TAG_CLICK | cut -d"=" -f2)
+	fullmenu=$(xprop -root _NIHWM_FULL_MENU | cut -d"=" -f2)
 }
 
 initvar
@@ -127,86 +131,70 @@ do
 
 	initvar
 
-	# Battery
-
-	# Is Capslock
 	if [ "$caps" = "on" ]; then
 		caps='C'
 	else
 		caps=''
 	fi
-
-	# Is NumLock
 	if [ "$nums" = "on" ]; then
 		nums='N'
 	else
 		nums=''
 	fi
-
-	# Is Focus On Switch
 	if [ "$focusmode" = ' 1' ]; then
 		focusmode='F'
 	else
 		focusmode=''
 	fi
-
-	# Compositor
 	if [ "$compositoractive" = ' 1' ]; then
 		compositoractive='@'
 	else
 		compositoractive=''
 	fi
-
-	# Attach below
 	if [ "$attachbelow" = ' 1' ]; then
 		attachbelow='a'
 	else
 		attachbelow=''
 	fi
-
-	# Allow next floating
 	if [ "$allownextfloating" = ' 1' ]; then
 		allownextfloating='_'
 	else
 		allownextfloating=''
 	fi
-
-	# Allow next floating
 	if [ "$showoverlay" = ' 1' ]; then
 		showoverlay='w'
 	else
 		showoverlay=''
 	fi
-
-	# Ignore master focus in stack
 	if [ "$ignoremasterfocus" = ' 1' ]; then
 		ignoremasterfocus='M'
 	else
 		ignoremasterfocus=''
 	fi
-
-	# Cursor warp
 	if [ "$iscursorwarp" = ' 1' ]; then
 		iscursorwarp='^'
 	else
 		iscursorwarp=''
 	fi
-
-	# 
 	if [ "$btrresizing" = ' 1' ]; then
 		btrresizing='R'
 	else
 		btrresizing=''
 	fi
+	if [ "$tagclick" = ' 0' ]; then
+		tagclick='t'
+	else
+		tagclick=''
+	fi
 
 	# Battery checker
 	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
-		notify-send --urgency=critical -t 0 --icon=battery "Battery is low" "<span font='50px'>Please charge your Laptop's battery or use the cable while your laptop is still on.</span>"
+		notify-send --urgency=critical -t 0 --icon=battery "Battery is low" "<span font='45px'>Please charge your Laptop's battery or use the cable while your laptop is still on.</span>"
 		battery_notified=true
 	fi
 
 	# All the rules, capslock, et cetera
-	condition="${nums}${caps}${showoverlay}${btrresizing}${iscursorwarp}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
+	condition="${nums}${caps}${showoverlay}${tagclick}${btrresizing}${iscursorwarp}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
 	
 	# Set status bar
 	! xsetroot -name "[$condition] | $(date) | ${volume} | ${battery} | nihwm" && exit 69

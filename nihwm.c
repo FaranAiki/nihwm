@@ -256,7 +256,7 @@ buttonpress(XEvent *e)
 		click = ClkClientWin;
 	}
 	for (i = 0; i < LENGTH(buttons); i++)
-		if (click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button
+		if (click == buttons[i].click && (buttons[i].disable ? *buttons[i].disable : 1) && buttons[i].func && buttons[i].button == ev->button
 		&& CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state))
 			buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
 }
@@ -900,6 +900,7 @@ keypress(XEvent *e)
 	keysym = XKeycodeToKeysym(dpy, (KeyCode)ev->keycode, 0);
 	for (i = 0; i < LENGTH(keys); i++)
 		if (keysym == keys[i].keysym
+		&& (keys[i].disable ? *keys[i].disable : 1)
 		&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
 		&& ev->type == keys[i].type
 		&& keys[i].func)

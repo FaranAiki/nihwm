@@ -9,10 +9,18 @@
 
 enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating,
 	   CusShowOverlay, CusIgnoreMasterFocus, CusNumOfMaster, CusCursorWarp,
-	   CusBottomRightResizing,
+	   CusBottomRightResizing, CusTagClick,
 	   CusLast,}; /* custom atoms */
 
+enum {
+	KeymodeNormal, /* normal behavior */
+	KeymodeControl, /* using every key without pressing the Mod button */
+
+}; /* keymodes */ 
+
 extern const Signal signals[];
+
+extern int keymode;
 
 /* this is where all the rulemodes are defined */
 extern int allownextfloating;
@@ -23,10 +31,11 @@ extern int iscursorwarp;
 extern int showoverlay;
 extern int switchonfocus;
 extern int btrresizing;
+extern int istagclick;
 
 extern int col_sel;
 
-extern const unsigned int snap;
+extern unsigned int snap;
 extern /* unsigned */ int borderpx;
 extern /* unsigned */ int gappx;
 
@@ -46,6 +55,7 @@ void togglecursorwarp(const Arg *arg);
 void toggleswitchonfocus(const Arg *arg);
 void toggleoverlay(const Arg *arg);
 void toggleignoremasterfocus(const Arg *arg);
+void toggletagclick(const Arg *arg);
 void setupcusatom(void);
 int signalhandle(void);
 
@@ -53,6 +63,9 @@ int signalhandle(void);
 void settopbar(const Arg *arg);
 void setsnap(const Arg *arg);
 void setgappx(const Arg *arg);
+void setborderpx(const Arg *arg);
+void setkeymode(const Arg *arg);
+void updatekeymode(void);
 
 /* constants */
 extern const char *nihwmctl_kill_[];

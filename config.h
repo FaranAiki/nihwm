@@ -227,7 +227,9 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_l,      setmfact,       {.f = +0.015} },
 	{ KeyPress,      MODKEY,             XK_bracketleft,  incngappx, {.i = -2 } },
 	{ KeyPress,      MODKEY,             XK_bracketright, incngappx, {.i = +2 } },
-	
+
+	{ KeyPress,      MODKEY|ControlMask, XK_k,      setkeymode,     {.i = 1}, },
+
 	{ KeyPress,      MODKEY,             XK_Return, zoom,           {0} },
 	{ KeyPress,      MODKEY,             XK_Tab,    view,           {0} },
 	{ KeyPress,      MODKEY, 			 XK_q,      killclientsel,  {.i = 0} },
@@ -273,6 +275,7 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_c,      togglecolorsel,          {0} }, // color selection
 	{ KeyPress,      MODKEY|ControlMask, XK_w,      togglecursorwarp,        {-1} }, // cursor warp
 	{ KeyPress,      MODKEY|ControlMask, XK_f,      toggleallownextfloating, {-1} }, // disallow/allow mod+j or mod+k or similar to be focused
+	{ KeyPress,      MODKEY|ControlMask, XK_t,      toggletagclick,          {-1} }, // disallow/allow clicking on the top-left tags
 	{ KeyPress,      MODKEY|ShiftMask,   XK_c,      togglecompositor,        {-1} }, // use/don't use compositor
 	{ KeyPress,      MODKEY|ShiftMask,   XK_f,      toggleswitchonfocus,     {-1} }, // ignore popup focus
 	{ KeyPress,      MODKEY|ShiftMask,   XK_a,      toggleattachbelow,       {-1} },
@@ -332,10 +335,10 @@ Button buttons[] = {
 	
 	// { ClkRootWin,           0,              Button3,        0,              0 },	
 
-	{ ClkTagBar,            0,              Button1,        view,           {0} },
-	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
-	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
-	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
+	{ ClkTagBar,            0,              Button1,        view,           {0},   &istagclick, },
+	{ ClkTagBar,            0,              Button3,        toggleview,     {0},   &istagclick, },
+	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0},   &istagclick, },
+	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0},   &istagclick, },
 	
 	/*{ ClkTagBar,            MODKEY,         Button4,        toggletag,      {0} },
 	{ ClkTagBar,            MODKEY,         Button5,        toggletag,      {0} }, Implement scrolling */ 

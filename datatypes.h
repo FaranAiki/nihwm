@@ -32,7 +32,7 @@ typedef struct {
 	unsigned int button;
 	void (*func)(const Arg *arg);
 	const Arg arg;
-	const int disable;
+	int *disable;
 } Button;
 
 typedef struct Monitor Monitor;
@@ -58,7 +58,7 @@ typedef struct {
 	KeySym keysym;
 	void (*func)(const Arg *);
 	const Arg arg;
-	const int disable;
+	int *disable;
 } Key;
 
 typedef struct {

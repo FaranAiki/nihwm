@@ -53,7 +53,7 @@ fi
 #	sed 's/gtk-theme-name=.*/gtk-theme-name=Adwaita-dark/g' '~/.config/gtk-3.0/settings.ini' | tee '~/.config/gtk-3.0/settings.ini' 
 # fi
 
-echo "[($date)] :: starting nihwm from nih" > $HOME/.nihwm/log.txt
+echo "[$(date)] :: starting nihwm from nih" > $HOME/.nihwm/log.txt
 
 # X definitions
 userresources="$HOME/.Xresources"
@@ -121,7 +121,7 @@ picom -b & # TODO use PhyOS's fork
 nih-polkit &
 nihwm >> $HOME/.nihwm/log.txt # Do not exec 
 
-echo "[($date)] :: nihwm closed" >> $HOME/.nihwm/log.txt
+echo "[$(date)] :: nihwm closed" >> $HOME/.nihwm/log.txt
 
 unset XDG_CURRENT_DESKTOP
 unset DESKTOP_SESSION
