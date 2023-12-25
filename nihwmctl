@@ -37,7 +37,7 @@ iscommand xsetroot
 function initvar() {
 	battery=$(upower -i $(upower -e | grep 'BAT') | grep 'percentage' | cut -d " " -f15)
 	volume=$(amixer get Master | grep 'Right:.*\(.*\)' | cut -d" " -f7)
-	nums=$(xset q | grep 'Nums Lock' | awk '{print $8}')
+	nums=$(xset q | grep 'Num Lock' | awk '{print $8}')
 	caps=$(xset q | grep 'Caps Lock' | awk '{print $4}')
 
 	btrresizing=$(xprop -root _NIHWM_BOTTOM_RIGHT_RESIZING | cut -d"=" -f2)
@@ -49,6 +49,7 @@ function initvar() {
 	compositoractive=$(xprop -root _NIHWM_USING_COMPOSITOR | cut -d"=" -f2)
 	focusmode=$(xprop -root _NIHWM_FOCUS_CHANGE | cut -d"=" -f2)
 	tagclick=$(xprop -root _NIHWM_TAG_CLICK | cut -d"=" -f2)
+	keymode=$(xprop -root _NIHWM_KEYMODE | cut -d"=" -f2)
 	fullmenu=$(xprop -root _NIHWM_FULL_MENU | cut -d"=" -f2)
 }
 
@@ -128,7 +129,6 @@ elif [ "$1" = "statusbar" ]; then # STATUSBAR
 
 while true
 do
-
 	initvar
 
 	if [ "$caps" = "on" ]; then
@@ -197,7 +197,7 @@ do
 	condition="${nums}${caps}${showoverlay}${tagclick}${btrresizing}${iscursorwarp}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
 	
 	# Set status bar
-	! xsetroot -name "[$condition] | $(date) | ${volume} | ${battery} | nihwm" && exit 69
+	! xsetroot -name "[$condition]${keymode} | $(date) | ${volume} | ${battery} | nihwm" && exit 69
 
 	sleep 0.1
 done
