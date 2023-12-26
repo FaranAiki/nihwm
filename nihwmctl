@@ -50,7 +50,8 @@ function initvar() {
 	focusmode=$(xprop -root _NIHWM_FOCUS_CHANGE | cut -d"=" -f2)
 	tagclick=$(xprop -root _NIHWM_TAG_CLICK | cut -d"=" -f2)
 	keymode=$(xprop -root _NIHWM_KEYMODE | cut -d"=" -f2)
-	fullmenu=$(xprop -root _NIHWM_FULL_MENU | cut -d"=" -f2)
+	focusonpopup=$(xprop -root _NIHWM_FOCUS_POPUP | cut -d"=" -f2) # tbi
+	fullmenu=$(xprop -root _NIHWM_FULL_MENU | cut -d"=" -f2) # To be implemented
 }
 
 initvar

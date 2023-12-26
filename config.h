@@ -28,9 +28,10 @@ const char col_gray3[]       = "#bbbbbb";
 const char col_gray4[]       = "#eeeeee";
 const char col_cyan[]        = "#005577";
 const char col_purple[]      = "#4c115a";
+const char col_white[]       = "#ffffff";
 
 /* define the color when clicking Ctrl-C */
-const char * const used_color[]     = {col_black, col_gray2, col_gray4, col_cyan, col_purple};
+const char * const used_color[]     = {col_black, col_gray2, col_gray4, col_cyan, col_purple, col_white};
 
 /* metaconfig */
 int col_sel = 4;
@@ -134,6 +135,7 @@ const char *xkbjapanese[] = { "setxkbmap", "jp", NULL };
 const char *emojicmd[] = { "emoji-selector", NULL };
 
 /* startup */
+// TODO change this and move into ~/.nihwm/config
 const char **startup[] = {
 	/* command  */
 	pavucontrolcmd,
@@ -153,10 +155,12 @@ const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
-	/* class            instance      title          tags mask     isfloating   monitor    is overlay */
+	/* class            instance      title          tags mask     isfloating   monitor    isoverlay  nfocusonpopup*/
+	{  "Xfce4-notifyd", "xfce4-notifyd",  "xfce4-notifyd",0,       1,           -1,        0,         1, }, 
+	
 	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
-	{  "Ardour",        "ardour_ardour",  NULL,      1 << 0,       0,           -1, }, // ergonomic reason
-	{  "Ardour-8.1.0",   "ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot
+	{  "Ardour",        "ardour_ardour",  NULL,      1 << 0,       0,           -1, }, 
+	{  "Ardour-8.1.0",   "ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot, TODO change Ardour accordingly to its version
 	{  "Audacity",      "audacity",   NULL,          1 << 0,       0,           -1, },
 	{  "OpenUtau",      "OpenUtau",   NULL,          1 << 0,       0,           -1, },
 
@@ -190,7 +194,7 @@ const Rule rules[] = {
 	{  "Alacritty",     "Alacritty",   NULL,         1 << 8,       0,           -1, },
 	{  "XTerm",         "xterm",   NULL,             1 << 8,       0,           -1, },
 
-	{  "Mousepad",      "mousepad",   NULL,          3,            1,           -1,        1},
+	{  "Mousepad",      "mousepad",   NULL,          1 << 2,       1,           -1,        1},
 };
 
 /* Rule workflow */

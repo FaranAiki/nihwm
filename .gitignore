@@ -8,5 +8,8 @@
 
 nihwm
 
+compile_commands.json
+
 patch/
 patches/
+build/

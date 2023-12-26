@@ -1,7 +1,9 @@
 /* See LICENSE file for copyright and license details.
  *
- * nihwm?, fork of dwm by Muhammad Faran Aiki written in C and shell scripts
+ * nihwm, fork of dwm by Muhammad Faran Aiki written in C and shell scripts
+ * Heavily inspired by other tiling WMs such as InstantWM and PhyOS' wm
  * Of course this is not just taking the credit of the dwm, but I modify some of the functionality
+ * TODO add a python, ruby, code, whatev make this shit more bloat 🔥
  *
  * Source code read while modifying this program:
  * 1. xprop (handling sigkill selected client)
@@ -87,9 +89,10 @@ applyrules(Client *c)
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->instance || strstr(instance, r->instance)))
 		{
-			c->isoverlay  = r->isoverlay;
-			c->isfloating = r->isfloating;
-			c->tags |= r->tags;
+			c->isoverlay      = r->isoverlay;
+			c->isfloating     = r->isfloating;
+			c->nfocusonpopup  = r->nfocusonpopup;
+			c->tags          |= r->tags;
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
 				c->mon = m;
@@ -1023,14 +1026,14 @@ manage(Window w, XWindowAttributes *wa)
 	setclientstate(c, NormalState);
 	if (c->mon == selmon)
 		unfocus(selmon->sel, 0);
-	if (strcmp("xfce4-notifyd", c->name)) /* WE IGNORE NOTIFICATION BRO */
+	if (!c->nfocusonpopup) /* WE IGNORE NOTIFICATION BRO */
 		c->mon->sel = c;
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
 	// TODO is this important?
 	if (c && c->mon == selmon && iscursorwarp && switchonfocus)
 		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
-	if (strcmp("xfce4-notifyd", c->name))
+	if (!c->nfocusonpopup)
 		focus(NULL);
 	updateclientdesktop(c);
 }
