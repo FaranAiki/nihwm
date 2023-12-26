@@ -307,6 +307,10 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,                  XK_e,     spawn,   {.v = emojicmd} },
 };
 
+/* wtf my nvim (lsp C++??) says this is illegal wtf TODO implement this */
+int additionalkeys_len = 0;
+Key additionalkeys[64];
+
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 Button buttons[] = {
