@@ -1,8 +1,8 @@
-/* See LICENSE file for copyright and license details.
+/* See LICENSE file for copyright and license details.*
  *
  * nihwm, fork of dwm by Muhammad Faran Aiki written in C and shell scripts
  * Heavily inspired by other tiling WMs such as InstantWM and PhyOS' wm
- * Of course this is not just taking the credit of the dwm, but I modify some of the functionality
+ * Of course this is not just taking full credit of the dwm and/or patches, but I vehemently modify some of the functionality
  * TODO add a python, ruby, code, whatev make this shit more bloat 🔥
  *
  * Source code read while modifying this program:
@@ -15,7 +15,9 @@
  * 1. usage of rulemode
  * 2. usage of keymode
  * 3. default handling for some programs
- */
+ *
+ * The thorough documentation? Just look at the code!
+ * /
 
 /* include the main file */
 #include "nihwm.h"
@@ -1026,14 +1028,14 @@ manage(Window w, XWindowAttributes *wa)
 	setclientstate(c, NormalState);
 	if (c->mon == selmon)
 		unfocus(selmon->sel, 0);
-	if (!c->nfocusonpopup) /* WE IGNORE NOTIFICATION BRO */
+	if (!c->nfocusonpopup && focuspopup) /* WE IGNORE NOTIFICATION BRO */
 		c->mon->sel = c;
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
 	// TODO is this important?
 	if (c && c->mon == selmon && iscursorwarp && switchonfocus)
 		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
-	if (!c->nfocusonpopup)
+	if (!c->nfocusonpopup && focuspopup)
 		focus(NULL);
 	updateclientdesktop(c);
 }

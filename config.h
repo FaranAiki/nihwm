@@ -42,6 +42,9 @@ const char *colors[][3]      = {
 	[SchemeSel]  = { col_gray4, col_black, used_color[4] }, // default is 4
 };
 
+/* include everything */
+#include "layouts.h"
+
 /* to add your own layout, use the layout.c */
 const Layout layouts[] = {
 	/* symbol              arrange function */
@@ -69,9 +72,6 @@ int lockfullscreen        = 1;    /* 1 will force focus on the fullscreen window
 
 /* other(s) */
 const Arg startup_tag = { .ui = 1 << 8 }; /* where do you want the startup to be */
-
-/* include everything */
-#include "layout.h"
 
 /* Misc */
 #define USEDTERMINAL "kitty"
@@ -150,6 +150,7 @@ const char **startup[] = {
 };
 
 /* this is where the rules are defined */
+/* TODO SEPARATE RULEMODES WITH NORMAL WINDOW MODES */
 const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
@@ -285,6 +286,7 @@ Key keys[] = {
 	{ KeyPress,      MODKEY|ShiftMask,   XK_a,      toggleattachbelow,       {-1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_m,      toggleignoremasterfocus, {-1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_r,      togglebtrresizing,       {-1} },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_p,      togglefocuspopup,        {-1} },
 
 #ifdef TRAIN_KEYBOARD_LAYOUT
 	{ KeyPress,      MODKEY,             XK_F1,     spawn,          {.v = xkbqwerty} }, 	

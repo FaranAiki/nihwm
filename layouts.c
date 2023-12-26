@@ -3,6 +3,7 @@
 /* This is where all the layouts are located */
 
 #include "nihwm.h"
+#include "layouts.h"
 
 // TODO add more mode... bloat? NO
 

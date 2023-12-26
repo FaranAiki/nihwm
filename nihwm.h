@@ -158,6 +158,6 @@ void view(const Arg *arg);
 void zoom(const Arg *arg);
 
 /* configuration, allows nested code to access above variables */
-#include "layout.h"
+#include "layouts.h"
 
 #endif /* NIHWM_H */

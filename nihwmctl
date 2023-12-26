@@ -50,7 +50,7 @@ function initvar() {
 	focusmode=$(xprop -root _NIHWM_FOCUS_CHANGE | cut -d"=" -f2)
 	tagclick=$(xprop -root _NIHWM_TAG_CLICK | cut -d"=" -f2)
 	keymode=$(xprop -root _NIHWM_KEYMODE | cut -d"=" -f2)
-	focusonpopup=$(xprop -root _NIHWM_FOCUS_POPUP | cut -d"=" -f2) # tbi
+	focuspopup=$(xprop -root _NIHWM_FOCUS_POPUP | cut -d"=" -f2) # tbi
 	fullmenu=$(xprop -root _NIHWM_FULL_MENU | cut -d"=" -f2) # To be implemented
 }
 
@@ -187,6 +187,11 @@ do
 	else
 		tagclick=''
 	fi
+	if [ "$focuspopup" = ' 0' ]; then
+		focuspopup='P'
+	else
+		focuspopup=''
+	fi
 
 	# Battery checker
 	if [ "${battery%?}" -le "20"  ] && [ "$battery_notified" = "false" ]; then
@@ -195,7 +200,7 @@ do
 	fi
 
 	# All the rules, capslock, et cetera
-	condition="${nums}${caps}${showoverlay}${tagclick}${btrresizing}${iscursorwarp}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
+	condition="${nums}${caps}${showoverlay}${tagclick}${focuspopup}${btrresizing}${iscursorwarp}${ignoremasterfocus}${allownextfloating}${focusmode}${compositoractive}${attachbelow}"
 	
 	# Set status bar
 	! xsetroot -name "[$condition]${keymode} | $(date) | ${volume} | ${battery} | nihwm" && exit 69

@@ -4,7 +4,7 @@
 include config.mk
 
 CC = gcc 
-SRC = drw.c layout.c nihwm.c util.c rulemodes.c
+SRC = drw.c layouts.c nihwm.c util.c rulemodes.c
 OBJ = ${SRC:.c=.o}
 
 all: options nihwm

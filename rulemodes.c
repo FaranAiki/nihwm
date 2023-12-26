@@ -48,9 +48,12 @@ const Signal signals[] = {
 	{ "ignoremasterfocus",  toggleignoremasterfocus },
 	{ "overlay",            toggleoverlay },
 	{ "switchonfocus",      toggleswitchonfocus },
+	{ "newfocus",           toggleswitchonfocus },
 	{ "btrresizing",        togglebtrresizing },
 	{ "btr",                togglebtrresizing },
-	{ "tagclick",           togglebtrresizing },
+	{ "tagclick",           toggletagclick },
+	{ "focuspopup",         togglefocuspopup },
+	{ "focusonpopup",       togglefocuspopup },
 };
 
 
@@ -66,6 +69,7 @@ int showoverlay           = 0;    /* 1 means show the overlay (Mod-Shift-W windo
 int switchonfocus         = 0;    /* 1 means change to the current window which requests a focus */
 int btrresizing           = 1;    /* 1 means the resize (Mod+Mouse) is like in the normal dwm */
 int istagclick            = 0;    /* 1 means tag click is possible  */
+int focuspopup            = 1;    /* 1 means a new window will automatically be focused  */
 
 /* appearance */
 unsigned int snap            = 32;       /* snap pixel */
@@ -166,6 +170,7 @@ initcusatom()
 	cusatom[CusIgnoreMasterFocus] = XInternAtom(dpy, "_NIHWM_IGNORE_MASTER_FOCUS", False); // TODO implement this
 	cusatom[CusBottomRightResizing] = XInternAtom(dpy, "_NIHWM_BOTTOM_RIGHT_RESIZING", False); // TODO properly implement this
 	cusatom[CusTagClick] = XInternAtom(dpy, "_NIHWM_TAG_CLICK", False); 
+	cusatom[CusFocusPopup] = XInternAtom(dpy, "_NIHWM_FOCUS_POPUP", False); 
 	cusatom[CusKeymode] = XInternAtom(dpy, "_NIHWM_KEYMODE", False); 
 
 	cusatom[CusNumOfMaster] = XInternAtom(dpy, "_NIHWM_NUMBER_OF_MASTER", False);
@@ -193,7 +198,9 @@ setupcusatom()
 		PropModeReplace, (unsigned char *) stf[btrresizing], 1);
 	XChangeProperty(dpy, root, cusatom[CusTagClick], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[istagclick], 1);
-	
+	XChangeProperty(dpy, root, cusatom[CusFocusPopup], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[focuspopup], 1);
+
 	XChangeProperty(dpy, root, cusatom[CusKeymode], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) curkeymode, 1);
 	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
@@ -293,6 +300,15 @@ toggletagclick(const Arg *arg)
 	
 	XChangeProperty(dpy, root, cusatom[CusTagClick], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[istagclick], 1);
+}
+
+void
+togglefocuspopup(const Arg *arg)
+{
+	SSWITCH(focuspopup);
+	
+	XChangeProperty(dpy, root, cusatom[CusFocusPopup], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[focuspopup], 1);
 }
 
 // copy from dwmc and modified
