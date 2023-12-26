@@ -331,15 +331,15 @@ clientmessage(XEvent *e)
 	Client *c = wintoclient(cme->window);
 
 	Arg arg;
-
 	unsigned int i;
 
 	if (!c)
 		return;
+
 	if (cme->message_type == netatom[NetWMState]) {
 		if (cme->data.l[1] == netatom[NetWMFullscreen]
 		|| cme->data.l[2] == netatom[NetWMFullscreen])
-			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
+			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD */
 				|| (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ && !c->isfullscreen)));
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (!switchonfocus) {
@@ -626,7 +626,9 @@ enternotify(XEvent *e)
 		selmon = m;
 	} else if (!c || c == selmon->sel)
 		return;
-	focus(c);
+	
+	if (switchonfocus)
+		focus(c);
 }
 
 void
@@ -732,7 +734,7 @@ focusmon(const Arg *arg)
 	selmon = m;
 	focus(NULL);
 
-	numofmaster[0] = selmon->nmaster ;
+	numofmaster[0] = selmon->nmaster;
 
 	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *) numofmaster, 1);
@@ -913,12 +915,10 @@ keypress(XEvent *e)
 	if (keymode == KeymodeControl)
 		ev->state |= MODKEY;
 
-	NIH_LOG(("mod: %b; ev-state: %b; keymode: %d\n", CLEANMASK(keys[1].mod), CLEANMASK(ev->state), keymode))
-
 	for (i = 0; i < LENGTH(keys); i++)
 		if (keysym == keys[i].keysym
 		&& (keys[i].disable ? *keys[i].disable : 1)
-		&& CLEANMASK(keys[i].mod) == (CLEANMASK(ev->state) | (keymode == KeymodeControl ? MODKEY : 0))
+		&& CLEANMASK(keys[i].mod) == (CLEANMASK(ev->state))
 		&& ev->type == keys[i].type
 		&& keys[i].func)
 			keys[i].func(&(keys[i].arg));
@@ -1023,13 +1023,15 @@ manage(Window w, XWindowAttributes *wa)
 	setclientstate(c, NormalState);
 	if (c->mon == selmon)
 		unfocus(selmon->sel, 0);
-	c->mon->sel = c;
+	if (strcmp("xfce4-notifyd", c->name)) /* WE IGNORE NOTIFICATION BRO */
+		c->mon->sel = c;
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
 	// TODO is this important?
 	if (c && c->mon == selmon && iscursorwarp && switchonfocus)
 		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
-	focus(NULL);
+	if (strcmp("xfce4-notifyd", c->name))
+		focus(NULL);
 	updateclientdesktop(c);
 }
 
@@ -1492,6 +1494,7 @@ sendmon(Client *c, Monitor *m)
 void
 setclientstate(Client *c, long state)
 {
+	// TODO convert this
 	long data[] = { state, None };
 
 	XChangeProperty(dpy, c->win, wmatom[WMState], wmatom[WMState], 32,
