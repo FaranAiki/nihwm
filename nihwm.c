@@ -17,7 +17,7 @@
  * 3. default handling for some programs
  *
  * The thorough documentation? Just look at the code!
- * /
+ */
 
 /* include the main file */
 #include "nihwm.h"

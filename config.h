@@ -248,7 +248,7 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_u,      setlayout,      {.v = &layouts[5]} },
 	{ KeyPress,      MODKEY,             XK_o,      setlayout,      {.v = &layouts[6]} }, // TODO modify properly
 	{ KeyPress,      MODKEY,             XK_g,      setlayout,      {.v = &layouts[7]} },
-	{ KeyPress,      MODKEY|ShiftMask,   XK_d,      setlayout,      {.v = &layouts[8]} }, 
+	{ KeyPress,      MODKEY|ControlMask, XK_d,      setlayout,      {.v = &layouts[8]} }, 
 	{ KeyPress,      MODKEY|ShiftMask,   XK_t,      setlayout,      {.v = &layouts[9]} }, // tcl 
 	{ KeyPress,      MODKEY|ControlMask, XK_c,      setlayout,      {.v = &layouts[10]} }, // col
 
