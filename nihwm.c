@@ -627,7 +627,7 @@ enternotify(XEvent *e)
 	} else if (!c || c == selmon->sel)
 		return;
 	
-	if (switchonfocus)
+	/* if (switchonfocus) TODO IMPLEMENT THIS BRO, if we enternotfy */
 		focus(c);
 }
 
