@@ -98,7 +98,7 @@ export DESKTOP_SESSION="nih"
 export NIH_VERSION=$(nihwm -v)
 
 # XDG supports
-export XDG_CONFIG_HOME="~/.config"
+# export XDG_CONFIG_HOME="$HOME/.config"
 
 # Styling
 export GTK_THEME="Adwaita:dark"

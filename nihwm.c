@@ -2355,8 +2355,7 @@ main(int argc, char *argv[])
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("nihwm: cannot open display");
 
-	if (argc >= 2 && strcmp("-replace", argv[1]))
-		checkotherwm();
+	checkotherwm();
 
 	if (!(homedir = getenv("HOME")))
 		homedir = getpwuid(getuid())->pw_dir;
@@ -2369,7 +2368,7 @@ main(int argc, char *argv[])
 #endif /* __OpenBSD__ */
 	
 	spawn(&nihwmctl_start); /* remove this or no? */
-	if (argc == 1 || strcmp("-no-startapp", argv[1]) != 0) startapp(); // auto start application
+	if (argc == 1 || strcmp("-no-startapp", argv[1])) startapp(); // auto start application
 
 	/* config files, can be bash, shell, or even python */
 	strncpy(configfile, homedir, 256);

@@ -138,15 +138,15 @@ const char *emojicmd[] = { "emoji-selector", NULL };
 // TODO change this and move into ~/.nihwm/config
 const char **startup[] = {
 	/* command  */
-	pavucontrolcmd,
 	gromitmpxcmd,
+	pavucontrolcmd,
 	mousepadcmd,
 
 	termcmd,
 	browsercmd,
 	rhythmboxcmd,
 	thunarcmd,
-	lmms130cmd
+	lmms130cmd, // or lmmsnewcmd
 };
 
 /* this is where the rules are defined */
