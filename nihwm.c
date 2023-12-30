@@ -77,10 +77,13 @@ Window root, wmcheckwin;
 /* function implementations */
 // TODO make this perfect
 // TODO VERY DANGEROUS! because we don't know if the floating window is not destroyed
+// TODO loop in each floating window
 void
 applyfloatingtiling(Client *c)
 {
 	/* if (!c->isfloating) return; */
+
+	Client *lastfloating = NULL;
 
 	if (!c) return;
 
