@@ -138,13 +138,13 @@ const char *emojicmd[] = { "emoji-selector", NULL };
 // TODO change this and move into ~/.nihwm/config
 const char **startup[] = {
 	/* command  */
+	rhythmboxcmd,
 	gromitmpxcmd,
 	pavucontrolcmd,
 	mousepadcmd,
 
 	termcmd,
 	browsercmd,
-	rhythmboxcmd,
 	thunarcmd,
 	lmms130cmd, // or lmmsnewcmd
 };
@@ -158,6 +158,7 @@ const Rule rules[] = {
 	 */
 	/* class            instance      title          tags mask     isfloating   monitor    isoverlay  nfocusonpopup*/
 	{  "Xfce4-notifyd", "xfce4-notifyd",  "xfce4-notifyd",0,       1,           -1,        0,         1, }, 
+	{  "wineboot.exe", "wineboot.exe",  "Wine",3,         1,           -1,        0,         1, }, 
 	
 	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
 	{  "Ardour",        "ardour_ardour",  NULL,      1 << 0,       0,           -1, }, 
@@ -171,11 +172,13 @@ const Rule rules[] = {
 
 	{  "Rhythmbox",     "rhythmbox",  NULL,          1 << 2,       1,           -1,        1},
 
-	{  "Thunar",        "thunar",     NULL,          1 << 3,       0,           -1, },
+	 {  "Thunar",        "thunar",     NULL,          1 << 3,       0,           -1, },
+	// {  "Thunar",        "thunar",     NULL,          1 << 3,       1,           -1,        1, },
 
 	{  "Zathura",       "org.pwmt.zathura",   NULL,  1 << 4,       0,           -1, },
 	{  "Gromit-mpx",    "gromit-mpx",  NULL,         1 << 4,       0,           -1, },
 	{  "Pavucontrol",   "pavucontrol",  NULL,        1 << 4,       0,           -1, },
+	// {  "Pavucontrol",   "pavucontrol",  NULL,        1 << 4,       1,           -1,        1},
 
 	{  "Whatsapp-for-linux", "whatsapp-for-linux", NULL, 1 << 5,   0,           -1, },
 	{  "discord",       "discord",      NULL,        1 << 5,       0,           -1, },
@@ -196,6 +199,8 @@ const Rule rules[] = {
 	{  "XTerm",         "xterm",   NULL,             1 << 8,       0,           -1, },
 
 	{  "Mousepad",      "mousepad",   NULL,          1 << 2,       1,           -1,        1},
+	
+	{  "Carla2-Plugin", "carla-plugin", NULL,        0,            1,           -1, },
 };
 
 /* Rule workflow */

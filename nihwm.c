@@ -37,14 +37,14 @@ struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
 /* global variables */
 Client *lastfocused = NULL;
 Client *prevzoom = NULL;
-Client *lastfloating[10]; /* TODO optimize */
+Client *lastfloating = NULL;
 const char broken[] = "broken"; /* wtf is this? */
 char stext[256];
 int screen;
-int floating_change[10]; /* used to determine if floating needed to change */
-int sw, sh;           /* X display screen geometry width, height */
-int bh, blw = 0;      /* bar geometry */
-int lrpad;            /* sum of left and right padding for text */
+int floating_change = 0; /* used to determine if floating needed to change */
+int sw, sh;              /* X display screen geometry width, height */
+int bh, blw = 0;         /* bar geometry */
+int lrpad;               /* sum of left and right padding for text */
 int (*xerrorxlib)(Display *, XErrorEvent *);
 unsigned int numlockmask = 0;
 void (*handler[LASTEvent]) (XEvent *) = {
@@ -75,12 +75,35 @@ Monitor *mons, *selmon;
 Window root, wmcheckwin;
 
 /* function implementations */
+// TODO make this perfect
+// TODO VERY DANGEROUS! because we don't know if the floating window is not destroyed
 void
 applyfloatingtiling(Client *c)
 {
 	/* if (!c->isfloating) return; */
-	
-	
+
+	if (!c) return;
+
+	// REMINDER when we change the layout of nihwm
+	// we must change the c->x and c->y too
+	if (lastfloating && lastfloating->h <= sh) {
+		if (floating_change) {
+			c->y = lastfloating->h + lastfloating->y + gappx, c->x = c->bw;
+		} else {
+			c->x = lastfloating->w + gappx;
+			c->y = lastfloating->y;
+		}
+
+		// c->w = MIN(sw / 2, sw - c->w) - c->bw - gappx, c->h = MIN(sh / 2, sh - c->h) - c->bw; // Not perfect!
+	} else {
+		c->x = c->bw, c->y = bh;
+		// c->w = sw / 2 - c-> bw, c->h = sh / 2 - c->bw;
+	}
+
+	if (c->w + c->x >= sw - c->bw - gappx) floating_change = 1;
+	else floating_change = 0;
+
+	lastfloating = c;
 }
 
 void
@@ -1019,7 +1042,6 @@ manage(Window w, XWindowAttributes *wa)
 		&& (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
 	c->bw = borderpx;
 
-	applyfloatingtiling(c);
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
@@ -1027,6 +1049,7 @@ manage(Window w, XWindowAttributes *wa)
 	updatewindowtype(c);
 	updatesizehints(c);
 	updatewmhints(c);
+	if (c->isfloating) applyfloatingtiling(c); // TODO should I use this before c->x + WIDTH(c) .. 1030?
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
 	if (!c->isfloating)
