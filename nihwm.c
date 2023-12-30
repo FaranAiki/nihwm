@@ -37,11 +37,9 @@ struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
 /* global variables */
 Client *lastfocused = NULL;
 Client *prevzoom = NULL;
-Client *lastfloating = NULL;
 const char broken[] = "broken"; /* wtf is this? */
 char stext[256];
 int screen;
-int floating_change = 0; /* used to determine if floating needed to change */
 int sw, sh;              /* X display screen geometry width, height */
 int bh, blw = 0;         /* bar geometry */
 int lrpad;               /* sum of left and right padding for text */
@@ -76,24 +74,27 @@ Window root, wmcheckwin;
 
 /* function implementations */
 // TODO make this perfect
-// TODO VERY DANGEROUS! because we don't know if the floating window is not destroyed
-// TODO loop in each floating window
 void
 applyfloatingtiling(Client *c)
 {
 	/* if (!c->isfloating) return; */
 
-	Client *lastfloating = NULL;
+	Client *cl, *lastfloating = NULL;
+
+	for (cl = selmon->clients; cl; cl = cl->next)
+		if (((c != cl) && (ISVISIBLE(cl) && cl->isfloating)) || (c->isoverlay && cl->isoverlay)) { // overlay has its "own rule"
+			lastfloating = cl;
+			break;
+		}
 
 	if (!c) return;
 
-	// REMINDER when we change the layout of nihwm
-	// we must change the c->x and c->y too
+	// REMINDER when we change the layout of nihwm we must change the c->x and c->y too
 	if (lastfloating && lastfloating->h <= sh) {
-		if (floating_change) {
+		if (lastfloating->x + c->w >= sw) {
 			c->y = lastfloating->h + lastfloating->y + gappx, c->x = c->bw;
 		} else {
-			c->x = lastfloating->w + gappx;
+			c->x = lastfloating->w + lastfloating->x + gappx;
 			c->y = lastfloating->y;
 		}
 
@@ -103,8 +104,10 @@ applyfloatingtiling(Client *c)
 		// c->w = sw / 2 - c-> bw, c->h = sh / 2 - c->bw;
 	}
 
-	if (c->w + c->x >= sw - c->bw - gappx) floating_change = 1;
-	else floating_change = 0;
+	c->oldx = c->x;
+	c->oldy = c->y;
+
+	NIH_LOG(("%s;%s\n", c->name, lastfloating->name));
 
 	lastfloating = c;
 }
@@ -246,18 +249,19 @@ attach(Client *c)
 	c->next = c->mon->clients;
 	c->mon->clients = c;
 }
+
 void
 attachbelow(Client *c)
 {
-	//If there is nothing on the monitor or the selected client is floating, attach as normal
+	// If there is nothing on the monitor or the selected client is floating, attach as normal
 	if(c->mon->sel == NULL || c->mon->sel == c || c->mon->sel->isfloating) {
 		attach(c);
 		return;
 	}
 
-	//Set the new client's next property to the same as the currently selected clients next
+	// Set the new client's next property to the same as the currently selected clients next
 	c->next = c->mon->sel->next;
-	//Set the currently selected clients next property to the new client
+	// Set the currently selected clients next property to the new client
 	c->mon->sel->next = c;
 
 }
@@ -1052,21 +1056,21 @@ manage(Window w, XWindowAttributes *wa)
 	updatewindowtype(c);
 	updatesizehints(c);
 	updatewmhints(c);
-	if (c->isfloating) applyfloatingtiling(c); // TODO should I use this before c->x + WIDTH(c) .. 1030?
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
 	if (!c->isfloating)
 		c->isfloating = c->oldstate = trans != None || c->isfixed;
 	if (c->isfloating)
 		XRaiseWindow(dpy, c->win);
-	if( isattachbelow )
-		attachbelow(c);
-	else
+	if (c->isfloating) applyfloatingtiling(c); // TODO should I use this before c->x + WIDTH(c) .. 1030?
+	if (!isattachbelow || c->isfloating)
 		attach(c);
+	else
+		attachbelow(c);
 	attachstack(c);
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
-	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this */
+	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this; wtf do you mean by this? */
 	setclientstate(c, NormalState);
 	if (c->mon == selmon)
 		unfocus(selmon->sel, 0);
@@ -1460,9 +1464,17 @@ restack(Monitor *m)
 		XRaiseWindow(dpy, m->sel->win);
 
 	/* raise the aot window */
-	for(Monitor *m_search = mons; m_search; m_search = m_search->next){
-		for(c = m_search->clients; c; c = c->next){
-			if(c->isalwaysontop || c->isoverlay){
+	for (Monitor *m_search = mons; m_search; m_search = m_search->next){
+		for (c = m_search->clients; c; c = c->next) {
+			if (c->isalwaysontop) {
+				XRaiseWindow(dpy, c->win);
+				break;
+			}
+		}
+
+		// TODO optimize this
+		for (c = m_search->clients; c; c = c->next) {
+			if (c->isoverlay) {
 				XRaiseWindow(dpy, c->win);
 				break;
 			}

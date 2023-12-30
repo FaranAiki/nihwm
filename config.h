@@ -196,7 +196,7 @@ const Rule rules[] = {
 	{  "st",            "st",      NULL,             1 << 8,       0,           -1, },
 	{  "neovide",       "neovide",      NULL,        1 << 8,       0,           -1, },
 	{  "Alacritty",     "Alacritty",   NULL,         1 << 8,       0,           -1, },
-	{  "XTerm",         "xterm",   NULL,             1 << 8,       0,           -1, },
+	{  "XTerm",         "xterm",   NULL,             1 << 8,       1,           -1, },
 
 	{  "Mousepad",      "mousepad",   NULL,          1 << 2,       1,           -1,        1},
 	
