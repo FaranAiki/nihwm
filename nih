@@ -97,6 +97,14 @@ export XDG_CURRENT_DESKTOP="nih"
 export DESKTOP_SESSION="nih"
 export NIH_VERSION=$(nihwm -v)
 
+# XDG supports
+export XDG_CONFIG_HOME="~/.config"
+
+# Styling
+export GTK_THEME="Adwaita:dark"
+export GTK2_RC_FILES=/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc
+export QT_STYLE_OVERRIDE=adwaita-dark
+
 # Set X
 xset r rate 250 100
 
@@ -104,6 +112,9 @@ xset r rate 250 100
 ifconfig wlan0 up
 iwctl device wlan0 set-property Powered on
 # mmcli device
+
+# Sound setup
+jack_control start &
 
 # Other setup
 if  [ -x $(command -v wineboot) ]; then
@@ -123,7 +134,3 @@ nihwm >> $HOME/.nihwm/log.txt # Do not exec
 
 echo "[$(date)] :: nihwm closed" >> $HOME/.nihwm/log.txt
 
-unset XDG_CURRENT_DESKTOP
-unset DESKTOP_SESSION
-unset DISPLAY
-unset NIH_VERSION
