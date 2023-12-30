@@ -2345,7 +2345,7 @@ main(int argc, char *argv[])
     char *execconfig[] = { "/bin/sh", "-c", configfile, NULL };
 
 	if (argc == 2 && !strcmp("-v", argv[1]))
-		die("nihwm-"VERSION);
+		printf("nihwm-"VERSION); /* don't die */
 	else if (argc == 2 && !strcmp("-h", argv[1]))
 		die("usage: nihwm [-v] or nihwm [-no-startapp] or nihwm [-replace]");
 
