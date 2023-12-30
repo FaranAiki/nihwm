@@ -9,7 +9,7 @@
 
 enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating,
 	   CusShowOverlay, CusIgnoreMasterFocus, CusNumOfMaster, CusCursorWarp,
-	   CusBottomRightResizing, CusTagClick, CusKeymode, CusFocusPopup,
+	   CusBottomRightResizing, CusTagClick, CusKeymode, CusFocusPopup, CusFloatingVisible,
 	   CusLast,}; /* custom atoms */
 
 enum {
@@ -36,6 +36,7 @@ extern int switchonfocus;
 extern int btrresizing;
 extern int istagclick;
 extern int focuspopup;
+extern int floatingvisible;
 
 extern int col_sel;
 
@@ -61,6 +62,7 @@ void toggleoverlay(const Arg *arg);
 void toggleignoremasterfocus(const Arg *arg);
 void toggletagclick(const Arg *arg);
 void togglefocuspopup(const Arg *arg);
+void togglefloatingvisible(const Arg *arg);
 void setupcusatom(void);
 int signalhandle(void);
 

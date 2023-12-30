@@ -15,8 +15,12 @@
  * 1. usage of rulemode
  * 2. usage of keymode
  * 3. default handling for some programs
+ * 4. usage of handling floating windows
  *
  * The thorough documentation? Just look at the code!
+ *
+ * nihwm is heavily designed with purpose and intents to be usable by using mouse and keyboard effectively;
+ * hence, the implementation of the float tiling and others
  */
 
 /* include the main file */
@@ -29,12 +33,15 @@
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
 
-/* variables */
+// TODO some people say globals are disgusting, I half agree, hence use STRUCT please
+/* global variables */
 Client *lastfocused = NULL;
 Client *prevzoom = NULL;
+Client *lastfloating[10]; /* TODO optimize */
 const char broken[] = "broken"; /* wtf is this? */
 char stext[256];
 int screen;
+int floating_change[10]; /* used to determine if floating needed to change */
 int sw, sh;           /* X display screen geometry width, height */
 int bh, blw = 0;      /* bar geometry */
 int lrpad;            /* sum of left and right padding for text */
@@ -68,6 +75,14 @@ Monitor *mons, *selmon;
 Window root, wmcheckwin;
 
 /* function implementations */
+void
+applyfloatingtiling(Client *c)
+{
+	/* if (!c->isfloating) return; */
+	
+	
+}
+
 void
 applyrules(Client *c)
 {
@@ -414,7 +429,7 @@ configurenotify(XEvent *e)
 	/* TODO: updategeom handling sucks, needs to be simplified */
 	if (ev->window == root) {
 		dirty = (sw != ev->width || sh != ev->height);
-		sw = ev->width;
+		sw = ev->width; /* is this even needed? */
 		sh = ev->height;
 		if (updategeom() || dirty) {
 			drw_resize(drw, sw, bh);
@@ -632,7 +647,7 @@ enternotify(XEvent *e)
 	} else if (!c || c == selmon->sel)
 		return;
 	
-	/* if (switchonfocus) TODO IMPLEMENT THIS BRO, if we enternotfy */
+	/* if (switchonfocus) TODO IMPLEMENT THIS BRO, if we enternotify */
 		focus(c);
 }
 
@@ -759,7 +774,7 @@ focusstack(const Arg *arg)
 	if (c) {
 		focus(c);
 		restack(selmon);
-		if (iscursorwarp) XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
+		if (iscursorwarp && (!c->isfloating || allownextfloating)) XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2); 
 	}
 }
 
@@ -1004,6 +1019,7 @@ manage(Window w, XWindowAttributes *wa)
 		&& (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
 	c->bw = borderpx;
 
+	applyfloatingtiling(c);
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
@@ -1032,7 +1048,6 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon->sel = c;
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
-	// TODO is this important?
 	if (c && c->mon == selmon && iscursorwarp && switchonfocus)
 		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
 	if (!c->nfocusonpopup && focuspopup)
@@ -1168,6 +1183,7 @@ movemouse(const Arg *arg)
 
 // NOT the copy from `movestack` patch
 // IMPORTANT should I use moveclient like findclient?
+// TODO implement this
 void
 movestack(const Arg *arg)
 {
@@ -1176,26 +1192,26 @@ movestack(const Arg *arg)
 	Client *after = findclient(cl, 1), *prebefore, *postafter,
 	       *before = findclient(cl, -1);
 
-	if (after && before)
-	if (arg->i > 0) {
-		postafter = findclient(after, 1);
-		if (!postafter) return;
-//		before->next = after;	
-//		cl->next = postafter;
-//		after->next = cl;
-	} else {
-		prebefore = findclient(before, -1);
-		if (!prebefore) return;
-//		prebefore->next = cl;
-//		cl->next = before;
-//		before->next = after;
+	if (after && before) {
+		if (arg->i > 0) {
+			postafter = findclient(after, 1);
+			if (!postafter) return;
+	//		before->next = after;	
+	//		cl->next = postafter;
+	//		after->next = cl;
+		} else {
+			prebefore = findclient(before, -1);
+			if (!prebefore) return;
+	//		prebefore->next = cl;
+	//		cl->next = before;
+	//		before->next = after;
+		}
 	}
 
 	restack(selmon);
 	arrange(selmon);
 }
 
-// TODO fix for allownextfloat and isoverlay
 Client *
 nexttiled(Client *c)
 {
@@ -1220,7 +1236,6 @@ propertynotify(XEvent *e)
 	XPropertyEvent *ev = &e->xproperty;
 
 	// REMINDER should I update status in each nihwmctl iteration, not propertynotify?
-	// TODO fix this
 	if ((ev->window == root) && (ev->atom == XA_WM_NAME) && !signalhandle())
 		updatestatus();
 	else if (ev->state == PropertyDelete)
@@ -1819,10 +1834,10 @@ togglebar(const Arg *arg)
 void
 togglecolorsel(const Arg *arg)
 {
-	int i; // we gonna use for (i = ..) instead of for (int i = ..)
+	int i; 
 
 	col_sel = (col_sel + 1) % LENGTH(used_color);
-	colors[SchemeSel][2] = used_color[col_sel]; // switch through color selection border
+	colors[SchemeSel][2] = used_color[col_sel]; 
 
 	/* copy from cleanup */
 	for (i = 0; i < LENGTH(colors); i++)

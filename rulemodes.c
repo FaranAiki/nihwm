@@ -54,6 +54,7 @@ const Signal signals[] = {
 	{ "tagclick",           toggletagclick },
 	{ "focuspopup",         togglefocuspopup },
 	{ "focusonpopup",       togglefocuspopup },
+	{ "floatingvisible",    togglefloatingvisible },
 };
 
 
@@ -70,6 +71,7 @@ int switchonfocus         = 0;    /* 1 means change to the current window which 
 int btrresizing           = 1;    /* 1 means the resize (Mod+Mouse) is like in the normal dwm */
 int istagclick            = 0;    /* 1 means tag click is possible  */
 int focuspopup            = 1;    /* 1 means a new window will automatically be focused  */
+int floatingvisible       = 1;    /* 1 means floating window will be visible */
 
 /* appearance */
 unsigned int snap            = 32;       /* snap pixel */
@@ -171,6 +173,7 @@ initcusatom()
 	cusatom[CusBottomRightResizing] = XInternAtom(dpy, "_NIHWM_BOTTOM_RIGHT_RESIZING", False); // TODO properly implement this
 	cusatom[CusTagClick] = XInternAtom(dpy, "_NIHWM_TAG_CLICK", False); 
 	cusatom[CusFocusPopup] = XInternAtom(dpy, "_NIHWM_FOCUS_POPUP", False); 
+	cusatom[CusFloatingVisible] = XInternAtom(dpy, "_NIHWM_FLOATING_VISIBLE", False); 
 	cusatom[CusKeymode] = XInternAtom(dpy, "_NIHWM_KEYMODE", False); 
 
 	cusatom[CusNumOfMaster] = XInternAtom(dpy, "_NIHWM_NUMBER_OF_MASTER", False);
@@ -200,6 +203,8 @@ setupcusatom()
 		PropModeReplace, (unsigned char *) stf[istagclick], 1);
 	XChangeProperty(dpy, root, cusatom[CusFocusPopup], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[focuspopup], 1);
+	XChangeProperty(dpy, root, cusatom[CusFloatingVisible], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[floatingvisible], 1);
 
 	XChangeProperty(dpy, root, cusatom[CusKeymode], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) curkeymode, 1);
@@ -309,6 +314,17 @@ togglefocuspopup(const Arg *arg)
 	
 	XChangeProperty(dpy, root, cusatom[CusFocusPopup], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[focuspopup], 1);
+}
+
+void
+togglefloatingvisible(const Arg *arg)
+{
+	SSWITCH(floatingvisible);
+	
+	XChangeProperty(dpy, root, cusatom[CusFloatingVisible], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) stf[floatingvisible], 1);
+
+	arrange(selmon);
 }
 
 // copy from dwmc and modified

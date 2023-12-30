@@ -9,8 +9,10 @@
 
 /* external variables */
 extern int gappx;
-extern int showoverlay;
+extern int showoverlay, floatingvisible;
 extern int bh, blw;
+
+/* implement masterbehind tiling */
 
 void
 tile(Monitor *m)

@@ -287,6 +287,7 @@ Key keys[] = {
 	{ KeyPress,      MODKEY|ShiftMask,   XK_m,      toggleignoremasterfocus, {-1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_r,      togglebtrresizing,       {-1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_p,      togglefocuspopup,        {-1} },
+	{ KeyPress,      MODKEY,             XK_v,      togglefloatingvisible,   {-1} },
 
 #ifdef TRAIN_KEYBOARD_LAYOUT
 	{ KeyPress,      MODKEY,             XK_F1,     spawn,          {.v = xkbqwerty} }, 	
