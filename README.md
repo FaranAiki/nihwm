@@ -1,6 +1,6 @@
 nihwm - dynamic window manager
 ============================
-![Screenshot](https://github.com/faranaiki/nihwm/example_screeshot.png)
+![Screenshot](https://github.com/FaranAiki/nihwm/blob/main/example_screenshot.png)
 
 ============================
 
