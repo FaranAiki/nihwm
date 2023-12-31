@@ -21,7 +21,7 @@ Sources
 Requirements
 ------------
 In order to build nihwm you need the Xlib header files.
-And please use Linux
+And, please use Linux or Arch/Artix :3
 
 Installation
 ------------
@@ -36,8 +36,12 @@ necessary as root):
 Running nihwm
 -----------
 Preferably, use 
+    
     nih
-    or startx $(which nih)
+    
+or 
+    
+    startx $(which nih)
 
 Add the following line to your .xinitrc to start nihwm using startx:
 
