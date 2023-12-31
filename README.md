@@ -12,12 +12,11 @@ TODO:
 	There are many todos here, such as modifying this README,d
 
 Sources
------------
-	dwm & patches
-    some PhyOS' fork of picom
-    some InstantWM config and such
+*	dwm & patches
+*   some PhyOS' fork of picom
+*   some InstantWM config and such
 
-	Wallpaper (modified into 1920x1080) from Pinterest: https://id.pinterest.com/pin/609252655826084493/ 
+*	Default Wallpaper (modified into 1920x1080) from Pinterest: https://id.pinterest.com/pin/609252655826084493/ 
 
 Requirements
 ------------
