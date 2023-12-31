@@ -1,4 +1,4 @@
-nihwm - dynamic window manager
+nihwm - nihilist window manager 
 ============================
 ![Screenshot](https://github.com/FaranAiki/nihwm/blob/main/example_screenshot.png)
 
