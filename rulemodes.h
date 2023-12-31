@@ -8,7 +8,7 @@
 #define SSWITCH(V) if (arg->i == -1) V = !V; else V = arg->i & 1
 
 enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating,
-	   CusShowOverlay, CusIgnoreMasterFocus, CusNumOfMaster, CusCursorWarp,
+	   CusShowOverlay, CusIgnoreMasterFocus, CusNumOfMaster, CusCursorWarp, CusInvisibleWindow,
 	   CusBottomRightResizing, CusTagClick, CusKeymode, CusFocusPopup, CusFloatingVisible,
 	   CusLast,}; /* custom atoms */
 
@@ -21,9 +21,6 @@ enum {
 extern const Signal signals[];
 
 extern int keymode;
-
-extern long numofmaster[1];
-extern long curkeymode[1];
 
 /* this is where all the rulemodes are defined */
 extern int allownextfloating;
@@ -63,6 +60,9 @@ void toggleignoremasterfocus(const Arg *arg);
 void toggletagclick(const Arg *arg);
 void togglefocuspopup(const Arg *arg);
 void togglefloatingvisible(const Arg *arg);
+void toggleforceinvisiblewindow(const Arg *arg);
+void toggleallforceinvisible(const Arg *arg);
+void killallfloatingwindow(const Arg *arg);
 void setupcusatom(void);
 int signalhandle(void);
 

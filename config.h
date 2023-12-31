@@ -3,7 +3,7 @@
 /* Should I separate config with another config? :3 */
 /* TODO separate config file */
 
-/* Copyright (c) Muhammad Faran Aiki 2023 */
+/* Copyright (c) 2023-2024 Muhammad Faran Aiki */
 
 #ifndef CONFIG_H
 #define CONFIG_H
@@ -293,6 +293,9 @@ Key keys[] = {
 	{ KeyPress,      MODKEY|ShiftMask,   XK_r,      togglebtrresizing,       {-1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_p,      togglefocuspopup,        {-1} },
 	{ KeyPress,      MODKEY,             XK_v,      togglefloatingvisible,   {-1} },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_v,      toggleforceinvisiblewindow, {0} },
+	{ KeyPress,      MODKEY|ControlMask, XK_v,      toggleallforceinvisible, {0} },
+	{ KeyPress,      MODKEY|ControlMask|ShiftMask, XK_v, killallfloatingwindow, {0} },
 
 #ifdef TRAIN_KEYBOARD_LAYOUT
 	{ KeyPress,      MODKEY,             XK_F1,     spawn,          {.v = xkbqwerty} }, 	

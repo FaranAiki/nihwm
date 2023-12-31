@@ -1,7 +1,7 @@
 #!/bin/sh
 
-#define VERSION 0.11
-NIHWMCTL_VERSION=0.11
+#define VERSION 0.12
+NIHWMCTL_VERSION=0.12
 
 # The X Set Root
 # Display Style here
@@ -86,7 +86,11 @@ graceful_close() {
 	done	
 }
 
-if [ "$1" = "logoutmenu" ]; then	
+if [ "$1" = "-v" ] || [ "$1" = "version" ]; then
+	echo $NIHWMCTL_VERSION
+	exit 1
+
+elif [ "$1" = "logoutmenu" ]; then	
 	option=$(printf "shutdown\nreboot\nlogout\n" | dmenu)
 	
 	if [ "$option" = "shutdown" ]; then

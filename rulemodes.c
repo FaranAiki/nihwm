@@ -57,8 +57,11 @@ const Signal signals[] = {
 	{ "floatingvisible",    togglefloatingvisible },
 };
 
-
+/* integer rule mode */
+int invisiblewindow = 0;
 int keymode = KeymodeNormal; 
+
+/* TODO use struct */
 
 /* this is where all the rulemodes are defined */
 int allownextfloating     = 0;    /* 1 means focusstack allows next window to be floating */
@@ -87,9 +90,6 @@ const long stf[2][1] = {
 	{1},
 }; 
 
-/* is this needed? */
-long curkeymode[1], numofmaster[1];
-
 /* constants */
 const char *nihwmctl_kill_[]  = {"killall", "nihwmctl", NULL};
 const char *nihwmctl_start_[] = {"nihwmctl", "statusbar", NULL};
@@ -109,10 +109,8 @@ const Arg nihwmctl_compo_kill = { .v = nihwmctl_compo_kill_ };
 void
 updatekeymode()
 {
-	/*long*/ curkeymode[0] = keymode;
-
 	XChangeProperty(dpy, root, cusatom[CusKeymode], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) curkeymode, 1);
+		PropModeReplace, (unsigned char *) &keymode, 1);
 
 	grabkeys();
 }
@@ -175,6 +173,7 @@ initcusatom()
 	cusatom[CusFocusPopup] = XInternAtom(dpy, "_NIHWM_FOCUS_POPUP", False); 
 	cusatom[CusFloatingVisible] = XInternAtom(dpy, "_NIHWM_FLOATING_VISIBLE", False); 
 	cusatom[CusKeymode] = XInternAtom(dpy, "_NIHWM_KEYMODE", False); 
+	cusatom[CusInvisibleWindow] = XInternAtom(dpy, "_NIHWM_INVISIBLE_WINDOW", False); 
 
 	cusatom[CusNumOfMaster] = XInternAtom(dpy, "_NIHWM_NUMBER_OF_MASTER", False);
 }
@@ -182,9 +181,6 @@ initcusatom()
 void
 setupcusatom()
 {
-	numofmaster[0] = selmon->nmaster;
-	curkeymode[0] = keymode;
-
 	XChangeProperty(dpy, root, cusatom[CusNetFocusChange], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) stf[switchonfocus], 1 );
 	XChangeProperty(dpy, root, cusatom[CusUsingCompositor], XA_CARDINAL, 32,
@@ -207,9 +203,11 @@ setupcusatom()
 		PropModeReplace, (unsigned char *) stf[floatingvisible], 1);
 
 	XChangeProperty(dpy, root, cusatom[CusKeymode], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) curkeymode, 1);
+		PropModeReplace, (unsigned char *) &keymode, 1);
 	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
-		PropModeReplace, (unsigned char *) numofmaster, 1);
+		PropModeReplace, (unsigned char *) &selmon->nmaster, 1);
+	XChangeProperty(dpy, root, cusatom[CusInvisibleWindow], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) &invisiblewindow, 1);
 }
 
 void
@@ -270,7 +268,6 @@ toggleoverlay(const Arg *arg)
 	arrange(selmon);
 }
 
-
 void
 toggleignoremasterfocus(const Arg *arg)
 {
@@ -325,6 +322,56 @@ togglefloatingvisible(const Arg *arg)
 		PropModeReplace, (unsigned char *) stf[floatingvisible], 1);
 
 	arrange(selmon);
+	unfocus(selmon->sel, 1);
+	focus(NULL);
+}
+
+void
+toggleforceinvisiblewindow(const Arg *arg)
+{
+	Client *c;
+
+	if (arg && arg->v)
+		c = (Client *) arg->v;
+	else
+		c = selmon->sel;
+
+	c->forceinvisible = 1;
+	invisiblewindow++;
+
+	arrange(selmon);
+	unfocus(selmon->sel, 1);
+	focus(NULL);
+
+	XChangeProperty(dpy, root, cusatom[CusInvisibleWindow], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) &invisiblewindow, 1);
+}
+
+void
+toggleallforceinvisible(const Arg *arg)
+{
+	Client *c;
+	for (c = selmon->clients; c; c = c->next)
+		c->forceinvisible = 0;
+
+	arrange(selmon);
+
+	XChangeProperty(dpy, root, cusatom[CusInvisibleWindow], XA_CARDINAL, 32,
+		PropModeReplace, (unsigned char *) &invisiblewindow, 1);
+}
+
+void
+killallfloatingwindow(const Arg *arg)
+{
+	Arg c_arg;
+	Client *c;
+	for (c = selmon->clients; c; c = c->next)
+		if (ISVISIBLE(c) && c->isfloating) {
+			c_arg.v = c;
+			killclient(&c_arg, 0);
+		}		
+
+	arrange(selmon);	
 }
 
 // copy from dwmc and modified

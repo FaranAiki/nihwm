@@ -3,11 +3,17 @@
  * nihwm, fork of dwm by Muhammad Faran Aiki written in C and shell scripts
  * Heavily inspired by other tiling WMs such as InstantWM and PhyOS' wm
  * Of course this is not just taking full credit of the dwm and/or patches, but I vehemently modify some of the functionality
+ * The sole purpose of nihwm is to make the WM as efficient in terms of productivity, such as making music, drawing, and programming
+ *
  * TODO add a python, ruby, code, whatev make this shit more bloat 🔥
+ * or implement your own language cuz you're a badass
  *
  * Source code read while modifying this program:
  * 1. xprop (handling sigkill selected client)
  * 2. wmctrl (handling graceful shutdown)
+ * 3. XLib
+ * 4. Hyprland
+ * 5. InstantWM
  *
  * TODO combine this with picom (idc what fork)
  *
@@ -20,7 +26,7 @@
  * The thorough documentation? Just look at the code!
  *
  * nihwm is heavily designed with purpose and intents to be usable by using mouse and keyboard effectively;
- * hence, the implementation of the float tiling and others
+ * hence, the implementation of the float tiling and others "sacrifice" the aesthetic of a "centered" floating window
  */
 
 /* include the main file */
@@ -104,10 +110,9 @@ applyfloatingtiling(Client *c)
 		// c->w = sw / 2 - c-> bw, c->h = sh / 2 - c->bw;
 	}
 
+	/* redundant? */
 	c->oldx = c->x;
 	c->oldy = c->y;
-
-	NIH_LOG(("%s;%s\n", c->name, lastfloating->name));
 
 	lastfloating = c;
 }
@@ -138,6 +143,7 @@ applyrules(Client *c)
 			c->isoverlay      = r->isoverlay;
 			c->isfloating     = r->isfloating;
 			c->nfocusonpopup  = r->nfocusonpopup;
+			c->iscentered     = r->iscentered;
 			c->tags          |= r->tags;
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
@@ -253,15 +259,12 @@ attach(Client *c)
 void
 attachbelow(Client *c)
 {
-	// If there is nothing on the monitor or the selected client is floating, attach as normal
 	if(c->mon->sel == NULL || c->mon->sel == c || c->mon->sel->isfloating) {
 		attach(c);
 		return;
 	}
 
-	// Set the new client's next property to the same as the currently selected clients next
 	c->next = c->mon->sel->next;
-	// Set the currently selected clients next property to the new client
 	c->mon->sel->next = c;
 
 }
@@ -784,10 +787,8 @@ focusmon(const Arg *arg)
 	selmon = m;
 	focus(NULL);
 
-	numofmaster[0] = selmon->nmaster;
-
 	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) numofmaster, 1);
+			PropModeReplace, (unsigned char *) &selmon->nmaster, 1);
 
 	if (selmon->sel && iscursorwarp)
 		XWarpPointer(dpy, None, selmon->sel->win, 0, 0, 0, 0, selmon->sel->w/2, selmon->sel->h/2);	

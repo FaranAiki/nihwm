@@ -40,7 +40,10 @@
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
                                * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
 /* optimize ISVISIBLE! */
-#define ISVISIBLE(C)            ((((C->tags & C->mon->tagset[C->mon->seltags]) && !(C->isoverlay && !showoverlay)) || (C->isoverlay && showoverlay)) && (C->isoverlay || (!C->isfloating || floatingvisible)))
+#define ISVISIBLE(C)            ((((((C->tags & C->mon->tagset[C->mon->seltags]) && !(C->isoverlay && !showoverlay)) \
+                                || (C->isoverlay && showoverlay)) \
+                                && (C->isoverlay || (!C->isfloating || floatingvisible))) \
+								&& (!C->forceinvisible)))
 #define LENGTH(X)               (sizeof X / sizeof *X)
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw + gappx)
@@ -159,7 +162,6 @@ void updatewmhints(Client *c);
 void view(const Arg *arg);
 void zoom(const Arg *arg);
 
-/* configuration, allows nested code to access above variables */
 #include "layouts.h"
 
 #endif /* NIHWM_H */
