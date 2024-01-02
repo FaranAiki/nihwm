@@ -11,7 +11,7 @@
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
-       NetWMFullscreen, NetActiveWindow, NetWMWindowType, NetWMWindowTypeNotification,
+       NetWMFullscreen, NetActiveWindow, NetWMWindowType, NetWMWindowTypeNotification, NetWMWindowTypeSplash,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetWMMoveResize, NetMoveResizeWindow, NetLast }; /* EWMH atoms */
 /* enum { ..., CusLast, } */ 
@@ -89,8 +89,8 @@ struct Monitor {
 };
 
 typedef struct {
-	const char *class;
 	const char *instance;
+	const char *class;
 	const char *title;
 	unsigned int tags;
 	int isfloating;

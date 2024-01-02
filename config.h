@@ -156,51 +156,51 @@ const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
-	/* class            instance      title          tags mask     isfloating   monitor    isoverlay  nfocusonpopup*/
-	{  "Xfce4-notifyd", "xfce4-notifyd",  "xfce4-notifyd",0,       1,           -1,        0,         1, }, 
-	{  "wineboot.exe", "wineboot.exe",  "Wine",3,         1,           -1,        0,         1, }, 
+	/* instance         class     title          tags mask     isfloating   monitor    isoverlay  nfocusonpopup*/
+	{  "xfce4-notifyd", "Xfce4-notifyd", "xfce4-notifyd",0,        1,           -1,        0,         1, }, 
+	{  "wineboot.exe", "wineboot.exe",  "Wine",      3,            1,           -1,        0,         1, }, 
 	
 	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
-	{  "Ardour",        "ardour_ardour",  NULL,      1 << 0,       0,           -1, }, 
-	{  "Ardour-8.1.0",   "ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot, TODO change Ardour accordingly to its version
-	{  "Audacity",      "audacity",   NULL,          1 << 0,       0,           -1, },
+	{  "ardour_ardour",        "Ardour",  NULL,      1 << 0,       0,           -1, }, 
+	{  "ardour-8.1.0",   "Ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot, TODO change Ardour accordingly to its version
+	{  "audacity",      "Audacity",   NULL,          1 << 0,       0,           -1, },
 	{  "OpenUtau",      "OpenUtau",   NULL,          1 << 0,       0,           -1, },
 
-	{  "Chromium",      "chromium",   NULL,          1 << 1,       0,           -1, },
-	{  "firefox",       "Navigator",  NULL,          1 << 1,       0,           -1, },
+	{  "chromium",      "Chromium",   NULL,          1 << 1,       0,           -1, },
+	{  "Navigator",       "firefox",  NULL,          1 << 1,       0,           -1, },
 	{  "Opera",         "Opera",      NULL,          1 << 1,       0,           -1, },
 
-	{  "Rhythmbox",     "rhythmbox",  NULL,          1 << 2,       1,           -1,        1},
+	{  "rhythmbox",     "Rhythmbox",  NULL,          1 << 2,       1,           -1,        1},
 
-	 {  "Thunar",        "thunar",     NULL,          1 << 3,       0,           -1, },
-	// {  "Thunar",        "thunar",     NULL,          1 << 3,       1,           -1,        1, },
+	 {  "thunar",        "Thunar",     NULL,          1 << 3,       0,           -1, },
+	// {  "thunar",        "Thunar",     NULL,          1 << 3,       1,           -1,        1, },
 
-	{  "Zathura",       "org.pwmt.zathura",   NULL,  1 << 4,       0,           -1, },
-	{  "Gromit-mpx",    "gromit-mpx",  NULL,         1 << 4,       0,           -1, },
-	{  "Pavucontrol",   "pavucontrol",  NULL,        1 << 4,       0,           -1, },
-	// {  "Pavucontrol",   "pavucontrol",  NULL,        1 << 4,       1,           -1,        1},
+	{  "org.pwmt.zathura",       "Zathura",   NULL,  1 << 4,       0,           -1, },
+	{  "gromit-mpx",    "Gromit-mpx",  NULL,         1 << 4,       0,           -1, },
+	{  "pavucontrol",   "Pavucontrol",  NULL,        1 << 4,       0,           -1, },
+	// {  "pavucontrol",   "Pavucontrol",  NULL,        1 << 4,       1,           -1,        1},
 
-	{  "Whatsapp-for-linux", "whatsapp-for-linux", NULL, 1 << 5,   0,           -1, },
+	{  "whatsapp-for-linux", "Whatsapp-for-linux", NULL, 1 << 5,   0,           -1, },
 	{  "discord",       "discord",      NULL,        1 << 5,       0,           -1, },
-	{  "TelegramDesktop", "telegram-desktop", NULL,  1 << 5,       0,           -1, },
+	{  "telegram-desktop", "TelegramDesktop", NULL,  1 << 5,       0,           -1, },
 	
 	{  "robloxplayerbeta.exe", "robloxplayerbeta.exe", NULL,  1 << 5,       0,  -1, },
 
 	{  "obs",           "obs",        NULL,          1 << 6,       0,           -1, },
-	{  "Olive",         "olive-editor",  NULL,       1 << 6,       0,           -1, },
+	{  "olive-editor",         "Olive",  NULL,       1 << 6,       0,           -1, },
 
 	{  "krita",         "krita",      NULL,          1 << 7,       0,           -1, },
-	{  "Inkscape",  "org.inkscape.Inkscape", NULL,   1 << 7,       0,           -1, },
+	{  "org.inkscape.Inkscape",  "Inkscape", NULL,   1 << 7,       0,           -1, },
 
 	{  "kitty",         "kitty",   NULL,             1 << 8,       0,           -1, },
 	{  "st",            "st",      NULL,             1 << 8,       0,           -1, },
 	{  "neovide",       "neovide",      NULL,        1 << 8,       0,           -1, },
 	{  "Alacritty",     "Alacritty",   NULL,         1 << 8,       0,           -1, },
-	{  "XTerm",         "xterm",   NULL,             1 << 8,       1,           -1, },
+	{  "xterm",         "XTerm",   NULL,             1 << 8,       1,           -1, },
 
-	{  "Mousepad",      "mousepad",   NULL,          1 << 2,       1,           -1,        1},
+	{  "mousepad",      "Mousepad",   NULL,          1 << 2,       1,           -1,        1},
 	
-	{  "Carla2-Plugin", "carla-plugin", NULL,        0,            1,           -1, },
+	{  "carla-plugin", "Carla2-Plugin", NULL,        0,            1,           -1, },
 };
 
 /* Rule workflow */
@@ -334,6 +334,7 @@ Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} }, // TODO disable this
 	
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
+	{ ClkWinTitle,          MODKEY,         Button2,        toggleallforceinvisible, {0} },
 	{ ClkWinTitle,          0,              Button4,        focusstack,     {.i = +1 } }, // Scroll up
 	{ ClkWinTitle,          0,              Button5,        focusstack,     {.i = -1 } }, // Scroll down
 	
@@ -352,7 +353,7 @@ Button buttons[] = {
 	{ ClkClientWin,         MODKEY|ShiftMask, Button1,      focusstack,     {.i = +1 } },
 	{ ClkClientWin,         MODKEY|ShiftMask, Button3,      focusstack,     {.i = -1 } },
 	
-	// { ClkRootWin,           0,              Button3,        0,              0 },	
+	 // { ClkRootWin,           0,              Button2,        toggleallforceinvisible, {0}, },	
 
 	{ ClkTagBar,            0,              Button1,        view,           {0},   &istagclick, },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0},   &istagclick, },

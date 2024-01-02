@@ -18,6 +18,12 @@ Sources
 
 *	Default Wallpaper (modified into 1920x1080) from Pinterest: https://id.pinterest.com/pin/609252655826084493/ 
 
+
+Another name
+------------
+If you, for some reason, do not like the name nihwm, then this window manager can be
+called lazywm, because this window manager is the epitome of laziness and dynamic
+
 Requirements
 ------------
 In order to build nihwm you need the Xlib header files.
@@ -32,6 +38,12 @@ Afterwards enter the following command to build and install nihwm (if
 necessary as root):
 
     sudo make clean install
+
+Floating
+------------
+nihwm will always stack floating from left to right, unless
+the window type is splash, notification, or dialog
+
 
 Running nihwm
 -----------
@@ -57,7 +69,7 @@ the DISPLAY environment variable is set correctly, e.g.:
 Configuration
 -------------
 The configuration of nihwm is done by creating a custom config.h
-and (re)compiling the source code.
+and (re)compiling the source code (preferred).
 
 Or, do it in ~/.nihwm/config
 where it is possible to use Python code, Lua code, or bash (please use bash)

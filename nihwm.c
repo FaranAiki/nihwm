@@ -93,7 +93,10 @@ applyfloatingtiling(Client *c)
 	// TODO patch this so that when go below, it is correct 
 	for (cl = selmon->clients; cl; cl = cl->next) {
 		Atom wtype = getatomprop(c, netatom[NetWMWindowType]);
-		if (wtype == netatom[NetWMWindowTypeDialog] || wtype == netatom[NetWMWindowTypeNotification]) continue;
+		if (wtype == netatom[NetWMWindowTypeDialog]
+				|| wtype == netatom[NetWMWindowTypeNotification]
+				|| wtype == netatom[NetWMWindowTypeSplash]
+				|| wtype == netatom[NetWMWindowTypeSplash]) continue;
 		if (!lastfloating && (((c != cl) && (ISVISIBLE(cl) && cl->isfloating)) || (c->isoverlay && cl->isoverlay))) { // overlay has its "own rule"
 			lastfloating = cl;
 			lastleft = cl;
@@ -1022,6 +1025,7 @@ manage(Window w, XWindowAttributes *wa)
 	Window trans = None;
 	XWindowChanges wc;
 	Atom wtype;
+	XClassHint ch = { NULL, NULL };
 
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
@@ -1713,8 +1717,10 @@ setup(void)
 	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
+
 	netatom[NetWMWindowTypeDialog] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
 	netatom[NetWMWindowTypeNotification] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_NOTIFICATION", False);
+	netatom[NetWMWindowTypeSplash] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_SPLASH", False);
 
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 	netatom[NetCloseWindow] = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
