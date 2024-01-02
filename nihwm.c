@@ -95,7 +95,6 @@ applyfloatingtiling(Client *c)
 		Atom wtype = getatomprop(c, netatom[NetWMWindowType]);
 		if (wtype == netatom[NetWMWindowTypeDialog]
 				|| wtype == netatom[NetWMWindowTypeNotification]
-				|| wtype == netatom[NetWMWindowTypeSplash]
 				|| wtype == netatom[NetWMWindowTypeSplash]) continue;
 		if (!lastfloating && (((c != cl) && (ISVISIBLE(cl) && cl->isfloating)) || (c->isoverlay && cl->isoverlay))) { // overlay has its "own rule"
 			lastfloating = cl;
@@ -1025,7 +1024,7 @@ manage(Window w, XWindowAttributes *wa)
 	Window trans = None;
 	XWindowChanges wc;
 	Atom wtype;
-	XClassHint ch = { NULL, NULL };
+ 	// XClassHint ch = { NULL, NULL };
 
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
@@ -1075,7 +1074,8 @@ manage(Window w, XWindowAttributes *wa)
 	wtype = getatomprop(c, netatom[NetWMWindowType]);
 	if (c->isfloating
 			&& wtype != netatom[NetWMWindowTypeDialog]
-			&& wtype != netatom[NetWMWindowTypeNotification])
+			&& wtype != netatom[NetWMWindowTypeNotification]
+			&& wtype != netatom[NetWMWindowTypeSplash])
 		applyfloatingtiling(c); // TODO should I use this before c->x + WIDTH(c) .. 1030?
 	if (!isattachbelow || c->isfloating)
 		attach(c);
