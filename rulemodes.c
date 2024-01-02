@@ -354,6 +354,8 @@ toggleallforceinvisible(const Arg *arg)
 	for (c = selmon->clients; c; c = c->next)
 		c->forceinvisible = 0;
 
+	invisiblewindow = 0;
+
 	arrange(selmon);
 
 	XChangeProperty(dpy, root, cusatom[CusInvisibleWindow], XA_CARDINAL, 32,

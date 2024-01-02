@@ -345,7 +345,7 @@ Button buttons[] = {
 	{ ClkStatusText,        ShiftMask,      Button5,        spawn,          {.v = decbrightcmd } },
 
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
-	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
+	{ ClkClientWin,         MODKEY,         Button2,        toggleforceinvisiblewindow, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
 	{ ClkClientWin,         MODKEY,         Button4,        focusstack,     {.i = +1 } }, // Scroll up
 	{ ClkClientWin,         MODKEY,         Button5,        focusstack,     {.i = -1 } }, // Scroll down

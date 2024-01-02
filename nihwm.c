@@ -90,13 +90,12 @@ applyfloatingtiling(Client *c)
 
 	int next_vertical = c->bw;
 
+	// TODO patch this so that when go below, it is correct 
 	for (cl = selmon->clients; cl; cl = cl->next) {
 		Atom wtype = getatomprop(c, netatom[NetWMWindowType]);
 		if (wtype == netatom[NetWMWindowTypeDialog] || wtype == netatom[NetWMWindowTypeNotification]) continue;
 		if (!lastfloating && (((c != cl) && (ISVISIBLE(cl) && cl->isfloating)) || (c->isoverlay && cl->isoverlay))) { // overlay has its "own rule"
 			lastfloating = cl;
-		}
-		if (cl->x <= next_vertical) {
 			lastleft = cl;
 		}
 	}
@@ -1022,6 +1021,7 @@ manage(Window w, XWindowAttributes *wa)
 	Client *c, *t = NULL;
 	Window trans = None;
 	XWindowChanges wc;
+	Atom wtype;
 
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
@@ -1066,14 +1066,18 @@ manage(Window w, XWindowAttributes *wa)
 		c->isfloating = c->oldstate = trans != None || c->isfixed;
 	if (c->isfloating)
 		XRaiseWindow(dpy, c->win);
-	if (c->isfloating) applyfloatingtiling(c); // TODO should I use this before c->x + WIDTH(c) .. 1030?
+	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
+		(unsigned char *) &(c->win), 1);
+	wtype = getatomprop(c, netatom[NetWMWindowType]);
+	if (c->isfloating
+			&& wtype != netatom[NetWMWindowTypeDialog]
+			&& wtype != netatom[NetWMWindowTypeNotification])
+		applyfloatingtiling(c); // TODO should I use this before c->x + WIDTH(c) .. 1030?
 	if (!isattachbelow || c->isfloating)
 		attach(c);
 	else
 		attachbelow(c);
 	attachstack(c);
-	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
-		(unsigned char *) &(c->win), 1);
 	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this; wtf do you mean by this? */
 	setclientstate(c, NormalState);
 	if (c->mon == selmon)
@@ -1692,10 +1696,12 @@ setup(void)
 
 	/* init atoms */
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
+	
 	wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete] = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);
 	wmatom[WMTakeFocus] = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
+
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
@@ -1708,12 +1714,12 @@ setup(void)
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	netatom[NetWMWindowTypeDialog] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+	netatom[NetWMWindowTypeNotification] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_NOTIFICATION", False);
 
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 	netatom[NetCloseWindow] = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
 	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
 	netatom[NetWMPID] = XInternAtom(dpy, "_NET_WM_PID", False);
-	netatom[NetWMWindowTypeNotification] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_NOTIFICATION", False);
 
 
 	/* init customizable atoms */
