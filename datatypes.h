@@ -11,7 +11,7 @@
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
-       NetWMFullscreen, NetActiveWindow, NetWMWindowType,
+       NetWMFullscreen, NetActiveWindow, NetWMWindowType, NetWMWindowTypeNotification,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetWMMoveResize, NetMoveResizeWindow, NetLast }; /* EWMH atoms */
 /* enum { ..., CusLast, } */ 

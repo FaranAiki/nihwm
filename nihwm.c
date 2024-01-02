@@ -31,6 +31,7 @@
 
 /* include the main file */
 #include "nihwm.h"
+#include "datatypes.h"
 #include "rulemodes.h"
 
 /* configuration, allows nested code to access above variables */
@@ -85,36 +86,40 @@ applyfloatingtiling(Client *c)
 {
 	/* if (!c->isfloating) return; */
 
-	Client *cl, *lastfloating = NULL;
+	Client *cl, *lastfloating = NULL, *lastleft = selmon->clients;
 
-	for (cl = selmon->clients; cl; cl = cl->next)
-		if (((c != cl) && (ISVISIBLE(cl) && cl->isfloating)) || (c->isoverlay && cl->isoverlay)) { // overlay has its "own rule"
+	int next_vertical = c->bw;
+
+	for (cl = selmon->clients; cl; cl = cl->next) {
+		Atom wtype = getatomprop(c, netatom[NetWMWindowType]);
+		if (wtype == netatom[NetWMWindowTypeDialog] || wtype == netatom[NetWMWindowTypeNotification]) continue;
+		if (!lastfloating && (((c != cl) && (ISVISIBLE(cl) && cl->isfloating)) || (c->isoverlay && cl->isoverlay))) { // overlay has its "own rule"
 			lastfloating = cl;
-			break;
 		}
+		if (cl->x <= next_vertical) {
+			lastleft = cl;
+		}
+	}
 
 	if (!c) return;
 
 	// REMINDER when we change the layout of nihwm we must change the c->x and c->y too
 	if (lastfloating && lastfloating->h <= sh) {
-		if (lastfloating->x + c->w >= sw) {
-			c->y = lastfloating->h + lastfloating->y + gappx, c->x = c->bw;
-		} else {
+		if (lastfloating->x + c->w >= sw) { /* go below */
+			c->y = lastleft->h + lastleft->y + gappx, c->x = next_vertical;
+		} else { /* stack left-right */
 			c->x = lastfloating->w + lastfloating->x + gappx;
 			c->y = lastfloating->y;
 		}
 
 		// c->w = MIN(sw / 2, sw - c->w) - c->bw - gappx, c->h = MIN(sh / 2, sh - c->h) - c->bw; // Not perfect!
 	} else {
-		c->x = c->bw, c->y = bh;
+		c->x = next_vertical, c->y = bh;
 		// c->w = sw / 2 - c-> bw, c->h = sh / 2 - c->bw;
 	}
 
 	/* redundant? */
-	c->oldx = c->x;
-	c->oldy = c->y;
-
-	lastfloating = c;
+	c->oldx = c->x, c->oldy = c->y;
 }
 
 void
@@ -927,10 +932,8 @@ incnmaster(const Arg *arg)
 	selmon->nmaster = MAX(selmon->nmaster + arg->i, 0);
 	arrange(selmon);
 
-	long numofmaster[] = { selmon->nmaster };
-
 	XChangeProperty(dpy, root, cusatom[CusNumOfMaster], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *) numofmaster, 1);
+			PropModeReplace, (unsigned char *) &selmon->nmaster, 1);
 }
 
 void
@@ -1710,6 +1713,7 @@ setup(void)
 	netatom[NetCloseWindow] = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
 	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
 	netatom[NetWMPID] = XInternAtom(dpy, "_NET_WM_PID", False);
+	netatom[NetWMWindowTypeNotification] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_NOTIFICATION", False);
 
 
 	/* init customizable atoms */
@@ -2101,10 +2105,8 @@ updateclientdesktop(Client *c) {
 // implement 
 void
 updatecurrentdesktop(){
-	long data[] = { selmon->tagset[selmon->seltags] };
-	
 	XChangeProperty(dpy, root, netatom[NetCurrentDesktop], XA_CARDINAL, 32,
-			PropModeReplace, (unsigned char *)data, 1);
+			PropModeReplace, (unsigned char *)&selmon->tagset[selmon->seltags], 1);
 }
 
 int
