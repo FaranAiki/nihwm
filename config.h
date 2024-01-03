@@ -161,6 +161,8 @@ const Rule rules[] = {
 	{  "wineboot.exe", "wineboot.exe",  "Wine",      0,            1,           -1,        0,         1, }, 
 	
 	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
+	{  "lmms",          "lmms",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
+	{  "lmms-new",      "lmms-new",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
 	{  "ardour_ardour", "Ardour",     NULL,      1 << 0,       0,           -1, }, 
 	{  "ardour-8.1.0",  "Ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot, TODO change Ardour accordingly to its version
 	{  "audacity",      "Audacity",   NULL,          1 << 0,       0,           -1, },
