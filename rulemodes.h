@@ -7,12 +7,12 @@
 
 #define SSWITCH(V) if (arg->i == -1) V = !V; else V = arg->i & 1
 
-enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating,
+enum CustomNet { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating,
 	   CusShowOverlay, CusIgnoreMasterFocus, CusNumOfMaster, CusCursorWarp, CusInvisibleWindow,
 	   CusBottomRightResizing, CusTagClick, CusKeymode, CusFocusPopup, CusFloatingVisible, CusWindowGap,
 	   CusLast,}; /* custom atoms */
 
-enum {
+enum KeymodeType {
 	KeymodeNormal, /* normal behavior */
 	KeymodeControl, /* using every key without pressing the Mod button */
 

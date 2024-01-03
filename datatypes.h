@@ -8,25 +8,25 @@
 #define NIH_LOG(X) printf X; fflush(stdout);
 
 /* enums */
-enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel }; /* color schemes */
-enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
+enum CursorType { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
+enum Scheme { SchemeNorm, SchemeSel }; /* color schemes */
+enum NetType { NetSupported, NetWMName, NetWMState, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType, NetWMWindowTypeNotification, NetWMWindowTypeSplash,
 	   NetWMWindowTypeDialog, NetClientList, NetNumberOfDesktops, NetWMPID,
 	   NetCurrentDesktop, NetWMDesktop, NetCloseWindow, NetWMMoveResize, NetMoveResizeWindow, NetLast }; /* EWMH atoms */
 /* enum { ..., CusLast, } */ 
-enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
-enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
+enum WMType { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
+enum ClickType { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
 
-typedef union {
+typedef union Arg {
 	int i;
 	unsigned int ui;
 	float f;
 	const void *v;
 } Arg;
 
-typedef struct {
+typedef struct Button {
 	unsigned int click;
 	unsigned int mask;
 	unsigned int button;
@@ -52,7 +52,7 @@ struct Client {
 	Window win;
 };
 
-typedef struct {
+typedef struct Key {
 	int type;
 	unsigned int mod;
 	KeySym keysym;
@@ -61,7 +61,7 @@ typedef struct {
 	int *disable;
 } Key;
 
-typedef struct {
+typedef struct Layout {
 	const char *symbol;
 	void (*arrange)(Monitor *);
 } Layout;
@@ -88,7 +88,7 @@ struct Monitor {
 	const Layout *lt[2];
 };
 
-typedef struct {
+typedef struct Rule {
 	const char *instance;
 	const char *class;
 	const char *title;
@@ -100,7 +100,7 @@ typedef struct {
 	int iscentered;
 } Rule;
 
-typedef struct {
+typedef struct Signal {
 	const char *signal;
 	void (*func)(const Arg *);
 } Signal;
