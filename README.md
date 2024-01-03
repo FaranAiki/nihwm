@@ -9,7 +9,9 @@ the window manager is useless. nih stands for nihilist (not the existential nor 
 but [artistic]
 
 TODO:
-	There are many todos here, such as modifying this README,d
+*   Modify this README.md
+*   Modify nihwm.1
+*   Fix problems in TODO comments
 
 Sources
 *	dwm & patches
@@ -47,7 +49,6 @@ Floating
 ------------
 nihwm will always stack floating from left to right, unless
 the window type is splash, notification, or dialog
-
 
 Running nihwm
 -----------

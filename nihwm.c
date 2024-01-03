@@ -739,7 +739,8 @@ findclient(Client *cl, int nb)
 					c = i;
 	}
 
-	if (nofloating && c->isfloating && !allownextfloating) return findclient(c ? c : selmon->clients, nb);
+	if (nofloating && c->isfloating && !allownextfloating)
+		return findclient(c ? c : selmon->clients, nb);
 
 	return c;
 }
@@ -786,6 +787,7 @@ focusmon(const Arg *arg)
 
 	if (!mons->next)
 		return;
+
 	if ((m = dirtomon(arg->i)) == selmon)
 		return;
 
@@ -940,8 +942,11 @@ incnmaster(const Arg *arg)
 void
 incngappx(const Arg *arg)
 {
-	gappx = MAX(gappx + arg->i, 2); // TODO fix this so that we can set this to 0
+	gappx = MIN(MAX(gappx + arg->i, 2), MIN(sh, sw)/4); // TODO fix this so that we can set this to 0
 	arrange(selmon);
+
+	XChangeProperty(dpy, root, cusatom[CusWindowGap], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) &gappx, 1);
 }
 
 #ifdef XINERAMA
@@ -1804,6 +1809,7 @@ showhide(Client *c)
 	} else {
 		/* hide clients bottom up */
 		showhide(c->snext);
+		/* todo modify this */
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 	}
 }

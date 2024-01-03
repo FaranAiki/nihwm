@@ -8,6 +8,7 @@ extern Display *dpy;
 extern Window root; 
 extern Atom cusatom[CusLast];
 extern Monitor *mons, *selmon; 
+extern int sh, sw;
 
 const Signal signals[] = {
 	/* signum               function */
@@ -39,7 +40,7 @@ const Signal signals[] = {
 	{ "gap",                setgappx },	
 	{ "gappx",              setgappx },	
 	{ "border",             setborderpx },	
-	{ "borderpx",            setborderpx },	
+	{ "borderpx",           setborderpx },	
 
 	{ "allownextfloating",  toggleallownextfloating },	
 	{ "compositor",         togglecompositor },
@@ -130,8 +131,11 @@ setsnap(const Arg *arg)
 void 
 setgappx(const Arg *arg)
 {
-	gappx = MAX(arg->i, 2); // TODO fix this so that we can set this to 0
+	gappx = MIN(MAX(arg->i, 2), MIN(sh, sw)/4); // TODO fix this so that we can set this to 0
 	arrange(selmon);
+
+	XChangeProperty(dpy, root, cusatom[CusWindowGap], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) &gappx, 1);
 }
 
 // TODO implement this correctly
@@ -174,6 +178,7 @@ initcusatom()
 	cusatom[CusFloatingVisible] = XInternAtom(dpy, "_NIHWM_FLOATING_VISIBLE", False); 
 	cusatom[CusKeymode] = XInternAtom(dpy, "_NIHWM_KEYMODE", False); 
 	cusatom[CusInvisibleWindow] = XInternAtom(dpy, "_NIHWM_INVISIBLE_WINDOW", False); 
+	cusatom[CusWindowGap] = XInternAtom(dpy, "_NIHWM_WINDOW_GAP", False); 
 
 	cusatom[CusNumOfMaster] = XInternAtom(dpy, "_NIHWM_NUMBER_OF_MASTER", False);
 }
@@ -208,6 +213,8 @@ setupcusatom()
 		PropModeReplace, (unsigned char *) &selmon->nmaster, 1);
 	XChangeProperty(dpy, root, cusatom[CusInvisibleWindow], XA_CARDINAL, 32,
 		PropModeReplace, (unsigned char *) &invisiblewindow, 1);
+	XChangeProperty(dpy, root, cusatom[CusWindowGap], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *) &gappx, 1);
 }
 
 void

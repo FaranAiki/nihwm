@@ -9,7 +9,7 @@
 
 enum { CusNetFocusChange, CusUsingCompositor, CusAttachBelow, CusAllowNextFloating,
 	   CusShowOverlay, CusIgnoreMasterFocus, CusNumOfMaster, CusCursorWarp, CusInvisibleWindow,
-	   CusBottomRightResizing, CusTagClick, CusKeymode, CusFocusPopup, CusFloatingVisible,
+	   CusBottomRightResizing, CusTagClick, CusKeymode, CusFocusPopup, CusFloatingVisible, CusWindowGap,
 	   CusLast,}; /* custom atoms */
 
 enum {
