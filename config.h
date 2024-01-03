@@ -338,7 +338,7 @@ Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} }, // TODO disable this
 	
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
-	{ ClkWinTitle,          MODKEY,         Button2,        toggleallforceinvisible, {0} },
+	{ ClkWinTitle,          MODKEY|ShiftMask, Button2,      toggleallforceinvisible, {0} },
 	{ ClkWinTitle,          0,              Button4,        focusstack,     {.i = +1 } }, // Scroll up
 	{ ClkWinTitle,          0,              Button5,        focusstack,     {.i = -1 } }, // Scroll down
 	
@@ -350,7 +350,8 @@ Button buttons[] = {
 	{ ClkStatusText,        ShiftMask,      Button5,        spawn,          {.v = decbrightcmd } },
 
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
-	{ ClkClientWin,         MODKEY,         Button2,        toggleforceinvisiblewindow, {0} },
+	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
+	{ ClkClientWin,         MODKEY|ShiftMask, Button2,      toggleforceinvisiblewindow, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
 	{ ClkClientWin,         MODKEY,         Button4,        focusstack,     {.i = +1 } }, // Scroll up
 	{ ClkClientWin,         MODKEY,         Button5,        focusstack,     {.i = -1 } }, // Scroll down
