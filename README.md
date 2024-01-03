@@ -5,8 +5,8 @@ nihwm - nihilist window manager
 ============================
 
 nihwm is a modified version of dwm with the philosophy that ricing/modifying
-the window manager. nih stands for nihilist (not the existential nor moral)
-[artistic]
+the window manager is useless. nih stands for nihilist (not the existential nor moral)
+but [artistic]
 
 TODO:
 	There are many todos here, such as modifying this README,d
@@ -23,6 +23,10 @@ Another name
 ------------
 If you, for some reason, do not like the name nihwm, then this window manager can be
 called lazywm, because this window manager is the epitome of laziness and dynamic
+
+Documentation
+------------
+It is not rtfm but rtfc lol
 
 Requirements
 ------------
