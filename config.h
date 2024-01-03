@@ -157,12 +157,12 @@ const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* instance         class     title          tags mask     isfloating   monitor    isoverlay  nfocusonpopup*/
-	{  "xfce4-notifyd", "Xfce4-notifyd", "xfce4-notifyd",0,        1,           -1,        0,         1, }, 
-	{  "wineboot.exe", "wineboot.exe",  "Wine",      3,            1,           -1,        0,         1, }, 
+	{  "xfce4-notifyd", "Xfce4-notifyd", "xfce4-notifyd", 0,        1,           -1,        0,         1, }, 
+	{  "wineboot.exe", "wineboot.exe",  "Wine",      0,            1,           -1,        0,         1, }, 
 	
 	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
-	{  "ardour_ardour",        "Ardour",  NULL,      1 << 0,       0,           -1, }, 
-	{  "ardour-8.1.0",   "Ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot, TODO change Ardour accordingly to its version
+	{  "ardour_ardour", "Ardour",     NULL,      1 << 0,       0,           -1, }, 
+	{  "ardour-8.1.0",  "Ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot, TODO change Ardour accordingly to its version
 	{  "audacity",      "Audacity",   NULL,          1 << 0,       0,           -1, },
 	{  "OpenUtau",      "OpenUtau",   NULL,          1 << 0,       0,           -1, },
 
@@ -187,8 +187,11 @@ const Rule rules[] = {
 	{  "robloxplayerbeta.exe", "robloxplayerbeta.exe", NULL,  1 << 5,       0,  -1, },
 
 	{  "obs",           "obs",        NULL,          1 << 6,       0,           -1, },
-	{  "olive-editor",         "Olive",  NULL,       1 << 6,       0,           -1, },
-
+	{  "olive-editor",  "Olive",      NULL,          1 << 6,       0,           -1, },
+	{  "kdenlive",      "kdenlive",   NULL,          1 << 6,       0,           -1, },
+	{  "flowblade", "Flowblade",      NULL,          1 << 6,       0,           -1, },
+	
+	{  "gimp",          "Gimp",       NULL,          1 << 7,       0,           -1, },
 	{  "krita",         "krita",      NULL,          1 << 7,       0,           -1, },
 	{  "org.inkscape.Inkscape",  "Inkscape", NULL,   1 << 7,       0,           -1, },
 
@@ -227,12 +230,12 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_b,      togglebar,      {-1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_b,      toggletopbar,   {-1} },
 	
-	{ KeyPress,      MODKEY,             XK_j,      focusstack,     {.i = +1 } },
-	{ KeyPress,      MODKEY,             XK_k,      focusstack,     {.i = -1 } },
-	{ KeyPress,      MODKEY|ShiftMask,   XK_j,      movestack,     {.i = +1 } },
-	{ KeyPress,      MODKEY|ShiftMask,   XK_k,      movestack,     {.i = -1 } },
-	{ KeyPress,      MODKEY,             XK_i,      incnmaster,     {.i = +1 } },
-	{ KeyPress,      MODKEY,             XK_d,      incnmaster,     {.i = -1 } },
+	{ KeyPress,      MODKEY,             XK_j,      focusstack,     {.i = +1} },
+	{ KeyPress,      MODKEY,             XK_k,      focusstack,     {.i = -1} },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_j,      movestack,     {.i = +1} },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_k,      movestack,     {.i = -1} },
+	{ KeyPress,      MODKEY,             XK_i,      incnmaster,     {.i = +1} },
+	{ KeyPress,      MODKEY,             XK_d,      incnmaster,     {.i = -1} },
 	{ KeyPress,      MODKEY,             XK_h,      setmfact,       {.f = -0.015} },
 	{ KeyPress,      MODKEY,             XK_l,      setmfact,       {.f = +0.015} },
 	{ KeyPress,      MODKEY,             XK_bracketleft,  incngappx, {.i = -2 } },
@@ -242,6 +245,7 @@ Key keys[] = {
 
 	{ KeyPress,      MODKEY,             XK_Return, zoom,           {0} },
 	{ KeyPress,      MODKEY,             XK_Tab,    view,           {0} },
+	{ KeyPress,      MODKEY,             XK_a,      viewfocus,      {0} },
 	{ KeyPress,      MODKEY, 			 XK_q,      killclientsel,  {.i = 0} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_q,      killclientsel,  {.i = 1} },
 

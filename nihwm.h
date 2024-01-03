@@ -160,6 +160,7 @@ void updatetitle(Client *c);
 void updatewindowtype(Client *c);
 void updatewmhints(Client *c);
 void view(const Arg *arg);
+void viewfocus(const Arg *arg);
 void zoom(const Arg *arg);
 
 #include "layouts.h"

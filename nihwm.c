@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details.*
  *
- * nihwm, fork of dwm by Muhammad Faran Aiki written in C and shell scripts
- * Heavily inspired by other tiling WMs such as InstantWM and PhyOS' wm
+ * nihwm, a patch/fork of dwm by Muhammad Faran Aiki written in C and shell scripts
+ * Heavily inspired by other tiling WMs such as InstantWM, Ragnar, and PhyOS' wm
  * Of course this is not just taking full credit of the dwm and/or patches, but I vehemently modify some of the functionality
  * The sole purpose of nihwm is to make the WM as efficient in terms of productivity, such as making music, drawing, and programming
  *
@@ -156,10 +156,12 @@ applyrules(Client *c)
 				c->mon = m;
 		}
 	}
+
 	if (ch.res_class)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
+	
 	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
 }
 
@@ -424,8 +426,6 @@ clientmessage(XEvent *e)
 	// TODO patch this
 	} else if (cme->message_type == netatom[NetCurrentDesktop]) {
 		c->tags = cme->data.l[0];
-
-		printf("HIT %d\n", c->tags);
 
 		// not fully supported
 
@@ -993,13 +993,10 @@ killclientsel(const Arg *arg)
 void
 killclient(const Arg *arg, const int forced)
 {
-	XTextProperty text_data;
-	int pid;
 	Client *c = (Client *) arg->v;
 	
 	if (!c) return;	
 
-	// selmon->sel becomes c
 	if (!forced && !sendevent(c, wmatom[WMDelete])) {
 		XGrabServer(dpy);
 		XSetErrorHandler(xerrordummy);
@@ -2317,6 +2314,14 @@ view(const Arg *arg)
 		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
 	focus(NULL);
 	arrange(selmon);
+}
+
+void
+viewfocus(const Arg *arg)
+{
+	Arg ar;
+	ar.ui = selmon->sel->tags;
+	view(&ar);
 }
 
 Client *
