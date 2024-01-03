@@ -1342,6 +1342,9 @@ resizeclient(Client *c, int x, int y, int w, int h)
 
 	wc.border_width = c->bw;
 
+	/* safety */
+	w = MAX(w, 2 * (gappx + 1)), h = MAX(h, 2 * (gappx + 1));
+
  	/* Get number of clients for the selected monitor */
  	for (n = 0, nbc = nexttiled(selmon->clients); nbc; nbc = nexttiled(nbc->next), n++);
  

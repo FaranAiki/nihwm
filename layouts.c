@@ -8,8 +8,8 @@
 // TODO add more mode... bloat? NO
 
 /* external variables */
-extern int gappx;
-extern int showoverlay, floatingvisible;
+extern int gappx; /* HEIGHT and WIDTH */
+extern int showoverlay, floatingvisible; /* ISVISIBLE */
 extern int bh, blw;
 
 /* implement masterbehind tiling */
