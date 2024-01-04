@@ -749,7 +749,8 @@ void
 focus(Client *c)
 {
 	if (!c || !ISVISIBLE(c))
-		for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
+		for (c = selmon->stack; c && !ISVISIBLE(c) && (c->isfloating || !allownextfloating); c = c->snext);
+	if (!c) c = selmon->stack; // there is no nonfloating window
 	if (selmon->sel && selmon->sel != c)
 		unfocus(selmon->sel, 0);
 	if (c) {
