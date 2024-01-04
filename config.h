@@ -156,19 +156,21 @@ const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
-	/* instance         class     title          tags mask     isfloating   monitor    isoverlay  nfocusonpopup*/
-	{  "xfce4-notifyd", "Xfce4-notifyd", "xfce4-notifyd", (unsigned int) ~0,     1,           -1,        0,         1, }, 
-	{  "wineboot.exe", "wineboot.exe",  "Wine",      0,            1,           -1,        0,         1, }, 
+	/* instance         class     title              tags mask     isfloating   monitor    isoverlay  nfocusonpopup*/
+	{  "xfce4-notifyd", "Xfce4-notifyd", "xfce4-notifyd", (unsigned int) ~0, 1,  -1,        0,         1, }, 
+	{  "wineboot.exe", "wineboot.exe",  "Wine",       (unsigned int) ~0,     1,  -1,        0,         1, }, 
 	
 	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
-	{  "lmms",          "lmms",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
-	{  "lmms-new",      "lmms-new",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
-	{  "ardour_ardour", "Ardour",     NULL,      1 << 0,       0,           -1, }, 
-	{  "ardour-8.1.0",  "Ardour-8.1.0", NULL,       1 << 0,       1,           -1, },  // this is flying whatnot, TODO change Ardour accordingly to its version
+	{  "lmms",          "lmms",  NULL,               1 << 0,       0,           -1, }, // ergonomic reason
+	{  "lmms-new",      "lmms-new",  NULL,           1 << 0,       0,           -1, }, // ergonomic reason
+	{  "ardour_ardour", "Ardour",     NULL,          1 << 0,       0,           -1, }, 
+	{  "ardour-8.1.0",  "Ardour-8.1.0", NULL,        1 << 0,       1,           -1, },  // this is flying whatnot, TODO change Ardour accordingly to its version
 	{  "audacity",      "Audacity",   NULL,          1 << 0,       0,           -1, },
 	{  "OpenUtau",      "OpenUtau",   NULL,          1 << 0,       0,           -1, },
 
 	{  "chromium",      "Chromium",   NULL,          1 << 1,       0,           -1, },
+	{  "vivaldi-stable", "Vivaldi-stable",   NULL,   1 << 1,       0,           -1, },
+	{  "brave-browser", "Brave-browser",   NULL,     1 << 1,       0,           -1, },
 	{  "Navigator",       "firefox",  NULL,          1 << 1,       0,           -1, },
 	{  "Opera",         "Opera",      NULL,          1 << 1,       0,           -1, },
 
