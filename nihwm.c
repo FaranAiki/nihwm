@@ -1067,22 +1067,28 @@ manage(Window w, XWindowAttributes *wa)
 	updatewmhints(c);
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
+
 	if (!c->isfloating)
 		c->isfloating = c->oldstate = trans != None || c->isfixed;
-	if (c->isfloating)
+	else
 		XRaiseWindow(dpy, c->win);
+	
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
+	
 	wtype = getatomprop(c, netatom[NetWMWindowType]);
+
 	if (c->isfloating
 			&& wtype != netatom[NetWMWindowTypeDialog]
 			&& wtype != netatom[NetWMWindowTypeNotification]
 			&& wtype != netatom[NetWMWindowTypeSplash])
 		applyfloatingtiling(c); // TODO should I use this before c->x + WIDTH(c) .. 1030?
+	
 	if (!isattachbelow || c->isfloating)
 		attach(c);
 	else
 		attachbelow(c);
+	
 	attachstack(c);
 	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this; wtf do you mean by this? */
 	setclientstate(c, NormalState);
@@ -1383,7 +1389,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 void
 resizemouse(const Arg *arg)
 {
-	enum { TopLeft, TopRight, BottomLeft, BottomRight, Center, End };
+	enum ResizeType { TopLeft, TopRight, BottomLeft, BottomRight, Center, ResizeTypeEnd };
 
 	int ocx, ocy, nw, nh, tx, ty, res_type = BottomRight;
 

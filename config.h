@@ -188,6 +188,7 @@ const Rule rules[] = {
 	
 	{  "robloxplayerbeta.exe", "robloxplayerbeta.exe", NULL,  1 << 5,       0,  -1, },
 
+	{  "openshot-qt", "openshot",     NULL,          1 << 6,       0,           -1, },
 	{  "obs",           "obs",        NULL,          1 << 6,       0,           -1, },
 	{  "olive-editor",  "Olive",      NULL,          1 << 6,       0,           -1, },
 	{  "kdenlive",      "kdenlive",   NULL,          1 << 6,       0,           -1, },
