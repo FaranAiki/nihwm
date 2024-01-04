@@ -195,6 +195,7 @@ const Rule rules[] = {
 	{  "olive-editor",  "Olive",      NULL,          1 << 6,       0,           -1, },
 	{  "kdenlive",      "kdenlive",   NULL,          1 << 6,       0,           -1, },
 	{  "flowblade", "Flowblade",      NULL,          1 << 6,       0,           -1, },
+	{  "shotcut", "Shotcut",          NULL,          1 << 6,       0,           -1, },
 	
 	{  "gimp",          "Gimp",       NULL,          1 << 7,       0,           -1, },
 	{  "krita",         "krita",      NULL,          1 << 7,       0,           -1, },
