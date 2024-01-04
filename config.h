@@ -157,7 +157,7 @@ const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* instance         class     title          tags mask     isfloating   monitor    isoverlay  nfocusonpopup*/
-	{  "xfce4-notifyd", "Xfce4-notifyd", "xfce4-notifyd", 0,        1,           -1,        0,         1, }, 
+	{  "xfce4-notifyd", "Xfce4-notifyd", "xfce4-notifyd", (unsigned int) ~0,     1,           -1,        0,         1, }, 
 	{  "wineboot.exe", "wineboot.exe",  "Wine",      0,            1,           -1,        0,         1, }, 
 	
 	{  "lmms.real",     "lmms.real",  NULL,          1 << 0,       0,           -1, }, // ergonomic reason
@@ -267,8 +267,8 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_space,  setlayout,         {0} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_space,  togglefloating,    {0} },
 	{ KeyPress,      MODKEY|ControlMask, XK_space,  togglealwaysontop, {0} },
-	{ KeyPress,      MODKEY,             XK_0,      view,           {.ui = ~0 } },
-	{ KeyPress,      MODKEY|ShiftMask,   XK_0,      tag,            {.ui = ~0 } },
+	{ KeyPress,      MODKEY,             XK_0,      view,           {.ui = (unsigned int)~0 } },
+	{ KeyPress,      MODKEY|ShiftMask,   XK_0,      tag,            {.ui = (unsigned int)~0 } },
 	{ KeyPress,      MODKEY,             XK_comma,  focusmon,       {.i = -1 } },
 	{ KeyPress,      MODKEY,             XK_period, focusmon,       {.i = +1 } },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_comma,  tagmon,         {.i = -1 } },
