@@ -745,6 +745,7 @@ findclient(Client *cl, int nb)
 	return c;
 }
 
+// TODO when changing view, floating can still be focused, fix this
 void
 focus(Client *c)
 {
