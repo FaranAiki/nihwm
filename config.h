@@ -236,6 +236,8 @@ Key keys[] = {
 	{ KeyPress,      MODKEY,             XK_b,      togglebar,      {-1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_b,      toggletopbar,   {-1} },
 	
+/*	{ KeyPress,      MODKEY,             XK_Right, shifttag,     {.i = +1} },
+	{ KeyPress,      MODKEY,             XK_Left,  shifttag,     {.i = -1} }, */
 	{ KeyPress,      MODKEY,             XK_j,      focusstack,     {.i = +1} },
 	{ KeyPress,      MODKEY,             XK_k,      focusstack,     {.i = -1} },
 	{ KeyPress,      MODKEY|ShiftMask,   XK_j,      movestack,     {.i = +1} },

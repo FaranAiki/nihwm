@@ -1823,6 +1823,24 @@ showhide(Client *c)
 }
 
 void
+shifttag(const Arg *arg)
+{
+	if (!arg) return;
+ 
+	if (arg->i > 0) {
+		selmon->seltags &= (unsigned int) ~(1 << (sizeof(selmon->seltags)*8 - 1));
+		selmon->seltags <<= 1;
+	} else if (arg->i < 0) {
+		selmon->seltags >>= 1;
+	}
+
+	if (arg->ui & TAGMASK)
+		selmon->tagset[selmon->seltags & 1] = arg->ui & TAGMASK;
+	focus(NULL);
+	arrange(selmon);
+}
+
+void
 sigchld(int unused)
 {
 	if (signal(SIGCHLD, sigchld) == SIG_ERR)

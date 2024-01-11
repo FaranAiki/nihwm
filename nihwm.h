@@ -132,6 +132,7 @@ void setnumbdesktops(void);
 void setup(void);
 void seturgent(Client *c, int urg);
 void showhide(Client *c);
+void shifttag(const Arg *arg);
 void sigchld(int unused);
 void sighup(int unused);
 void sigterm(int unused);
